@@ -19,6 +19,9 @@ public class NPCPatrolTalkAI : MonoBehaviour
     [Header("Chase")]
     public float chaseSpeed = 4f;
 
+    [Header("Player Control")]
+    public MonoBehaviour playerMovement; // ลากสคริปต์เดินของผู้เล่นมาใส่
+
     [Header("Stun")]
     public float stunTime = 3f;
 
@@ -123,6 +126,10 @@ public class NPCPatrolTalkAI : MonoBehaviour
     void StartTalk()
     {
         currentState = State.Talk;
+
+        if (playerMovement != null)
+            playerMovement.enabled = false;
+
         qteUI.StartQTE(this);
     }
 
@@ -130,7 +137,11 @@ public class NPCPatrolTalkAI : MonoBehaviour
     {
         currentState = State.Stun;
         stunTimer = stunTime;
+
+        if (playerMovement != null)
+            playerMovement.enabled = true;
     }
+
 
     // ---------------- STUN ----------------
     void Stun()

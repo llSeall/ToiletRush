@@ -1721,6 +1721,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   chaseSpeed: 4
+  playerMovement: {fileID: 556848275}
   stunTime: 3
   qteUI: {fileID: 1064989318}
 --- !u!136 &569357084
