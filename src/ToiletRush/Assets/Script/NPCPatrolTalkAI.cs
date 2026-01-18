@@ -5,7 +5,8 @@ public class NPCPatrolTalkAI : MonoBehaviour
 {
     public enum State { Patrol, Chase, Talk, Stun }
     public State currentState = State.Patrol;
-
+    [Header("Player Animation")]
+    public Animator playerAnimator;
     [Header("Patrol")]
     public Transform[] waypoints;
     public float moveSpeed = 2f;
@@ -127,8 +128,16 @@ public class NPCPatrolTalkAI : MonoBehaviour
     {
         currentState = State.Talk;
 
+        // ปิดการควบคุมผู้เล่น
         if (playerMovement != null)
             playerMovement.enabled = false;
+
+        // บังคับอนิเมชันเป็น Idle
+        if (playerAnimator != null)
+        {
+            playerAnimator.SetFloat("Speed", 0f);
+            playerAnimator.Play("Idle", 0, 0f); // ป้องกันเฟรมค้าง
+        }
 
         qteUI.StartQTE(this);
     }
@@ -141,6 +150,7 @@ public class NPCPatrolTalkAI : MonoBehaviour
         if (playerMovement != null)
             playerMovement.enabled = true;
     }
+
 
 
     // ---------------- STUN ----------------
