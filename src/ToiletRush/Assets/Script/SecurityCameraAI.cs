@@ -69,22 +69,49 @@ public class SecurityCameraAI : MonoBehaviour
     // ---------- VISION ----------
     void CheckVision()
     {
-        if (!canAlert) return;
+        if (!canAlert || isDisabled || rotator == null || player == null)
+            return;
 
-        Vector3 dirToPlayer = (player.position - transform.position).normalized;
-        float distance = Vector3.Distance(transform.position, player.position);
+        Vector3 origin = rotator.position + Vector3.up * 0.5f;
+        Vector3 target = player.position + Vector3.up * 0.5f;
 
-        if (distance > viewDistance) return;
+        Vector3 dirToPlayer = (target - origin).normalized;
+        float distance = Vector3.Distance(origin, target);
 
-        float angle = Vector3.Angle(transform.forward, dirToPlayer);
-        if (angle > viewAngle / 2f) return;
+        if (distance > viewDistance)
+            return;
 
-        if (!Physics.Raycast(transform.position + Vector3.up,
-            dirToPlayer, distance, obstacleMask))
+        // ใช้ทิศของ rotator จริง
+        float angle = Vector3.Angle(rotator.forward, dirToPlayer);
+        if (angle > viewAngle * 0.5f)
+            return;
+
+        RaycastHit hit;
+
+        //  ยิง Raycast แบบดูว่าโดนอะไรเป็นอันดับแรก
+        if (Physics.Raycast(
+            origin,
+            dirToPlayer,
+            out hit,
+            distance,
+            ~0, // ชนทุก Layer
+            QueryTriggerInteraction.Ignore
+        ))
         {
-            AlertNearestGuard();
+            //  เห็นผู้เล่นจริง
+            if (hit.transform.CompareTag("Player"))
+            {
+                AlertNearestGuard();
+            }
+            //  ชนอย่างอื่นก่อน (เช่น กำแพง)
+            else
+            {
+                return;
+            }
         }
     }
+
+
 
     // ---------- ALERT ----------
     void AlertNearestGuard()

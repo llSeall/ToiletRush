@@ -12,7 +12,6 @@ public class WinTrigger : MonoBehaviour
 
         WinGame();
     }
-
     void WinGame()
     {
         int stars = LevelResultManager.Instance.CalculateStars();
@@ -20,9 +19,10 @@ public class WinTrigger : MonoBehaviour
         SaveManager.SaveStars(levelName, stars);
         SaveManager.UnlockLevel(levelName);
 
-        winCanvas.SetActive(true);
+        winCanvas.SetActive(true);   // <-- Popup จะเล่นอัตโนมัติ
         starUI.ShowStars(stars);
 
         Time.timeScale = 0f;
     }
+
 }

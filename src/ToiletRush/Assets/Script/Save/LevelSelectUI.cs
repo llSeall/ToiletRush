@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections;
 
 public class LevelSelectUI : MonoBehaviour
 {
@@ -11,17 +12,29 @@ public class LevelSelectUI : MonoBehaviour
         public string sceneName;
         public Button button;
         public GameObject lockIcon;
+
         [Header("Star UI")]
-        public Image[] stars;        // 3 รูป
+        public Image[] stars;
         public Sprite starOn;
         public Sprite starOff;
-
     }
 
     public LevelButton[] levels;
 
+    [Header("Fade")]
+    public Image fadeImage;
+    public float fadeDuration = 1f;
+
+    private bool isLoading = false;
+
     void Start()
     {
+        //  ห้ามเปิด fadeImage ตรงนี้
+        if (fadeImage != null)
+        {
+            fadeImage.gameObject.SetActive(false);
+        }
+
         foreach (var level in levels)
         {
             bool unlocked = SaveManager.IsLevelUnlocked(level.levelIndex);
@@ -37,9 +50,12 @@ public class LevelSelectUI : MonoBehaviour
                 UpdateStars(level, starCount);
 
                 level.button.onClick.RemoveAllListeners();
+                string scene = level.sceneName;
+
                 level.button.onClick.AddListener(() =>
                 {
-                    SceneManager.LoadScene(level.sceneName);
+                    if (!isLoading)
+                        StartCoroutine(FadeAndLoad(scene));
                 });
             }
             else
@@ -48,6 +64,8 @@ public class LevelSelectUI : MonoBehaviour
             }
         }
     }
+
+
     void UpdateStars(LevelButton level, int count)
     {
         if (level.stars == null || level.stars.Length == 0) return;
@@ -57,6 +75,26 @@ public class LevelSelectUI : MonoBehaviour
             level.stars[i].sprite =
                 i < count ? level.starOn : level.starOff;
         }
+    }
+    IEnumerator FadeAndLoad(string sceneName)
+    {
+        isLoading = true;
+
+        fadeImage.gameObject.SetActive(true);
+        fadeImage.color = new Color(0, 0, 0, 0);
+
+        float t = 0f;
+        Color c = fadeImage.color;
+
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            c.a = Mathf.Lerp(0, 1, t / fadeDuration);
+            fadeImage.color = c;
+            yield return null;
+        }
+
+        SceneManager.LoadScene(sceneName);
     }
 
 

@@ -117,22 +117,38 @@ public class GuardAI : MonoBehaviour
     // ---------- VISION ----------
     void CheckVision()
     {
-        Vector3 dirToPlayer = (player.position - transform.position).normalized;
-        float distance = Vector3.Distance(transform.position, player.position);
+        Vector3 origin = transform.position + Vector3.up * 0.8f;
+        Vector3 target = player.position + Vector3.up * 0.8f;
+
+        Vector3 dirToPlayer = (target - origin).normalized;
+        float distance = Vector3.Distance(origin, target);
 
         if (distance > viewDistance) return;
 
         float angle = Vector3.Angle(transform.forward, dirToPlayer);
-        if (angle > viewAngle / 2f) return;
+        if (angle > viewAngle * 0.5f) return;
 
-        if (!Physics.Raycast(transform.position + Vector3.up,
-            dirToPlayer, distance, obstacleMask))
+        RaycastHit hit;
+
+        // ยิง Raycast ตรวจว่าโดนอะไรเป็นอันดับแรก
+        if (Physics.Raycast(
+            origin,
+            dirToPlayer,
+            out hit,
+            distance,
+            ~0, // ชนทุก Layer
+            QueryTriggerInteraction.Ignore
+        ))
         {
-            patrolReturnIndex = currentIndex;
-            lastSeenPosition = player.position;
+            if (hit.transform.CompareTag("Player"))
+            {
+                patrolReturnIndex = currentIndex;
+                lastSeenPosition = player.position;
 
-            currentState = State.Chase;
-            UpdateVisionColor(alertColor);
+                currentState = State.Chase;
+                UpdateVisionColor(alertColor);
+            }
+            // ถ้าโดนอย่างอื่นก่อน (เช่น กำแพง)  ไม่ทำอะไร
         }
     }
 
