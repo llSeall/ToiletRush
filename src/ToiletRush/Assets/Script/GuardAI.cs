@@ -151,6 +151,15 @@ public class GuardAI : MonoBehaviour
             // ถ้าโดนอย่างอื่นก่อน (เช่น กำแพง)  ไม่ทำอะไร
         }
     }
+    void OnTriggerEnter(Collider other)
+    {
+        if (currentState != State.Chase) return;
+
+        if (other.CompareTag("Player"))
+        {
+            CatchPlayer();
+        }
+    }
 
     // ---------- CHASE ----------
     void ChasePlayer()
