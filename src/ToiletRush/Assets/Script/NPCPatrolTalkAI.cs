@@ -5,23 +5,27 @@ public class NPCPatrolTalkAI : MonoBehaviour
 {
     public enum State { Patrol, Chase, Talk, Stun }
     public State currentState = State.Patrol;
+
     [Header("Player Animation")]
     public Animator playerAnimator;
+
     [Header("Patrol")]
     public Transform[] waypoints;
     public float moveSpeed = 2f;
     public float waitTimeAtPoint = 0.5f;
 
-    [Header("Detect")]
+    [Header("Detect (AI Zone)")]
     public float detectRadius = 5f;
     public float talkDistance = 1.5f;
     public LayerMask playerLayer;
+    public LayerMask obstacleMask;
 
     [Header("Chase")]
     public float chaseSpeed = 4f;
+    public float lostSightDelay = 0.6f; // หลบหลังสิ่งกีดขวางได้ชั่วคราว
 
     [Header("Player Control")]
-    public MonoBehaviour playerMovement; // ลากสคริปต์เดินของผู้เล่นมาใส่
+    public MonoBehaviour playerMovement;
 
     [Header("Stun")]
     public float stunTime = 3f;
@@ -31,20 +35,27 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
     private CharacterController controller;
     private Transform player;
+
     private int index;
     private int dir = 1;
     private float waitTimer;
     private float stunTimer;
+    private float lostSightTimer;
 
+    private int patrolReturnIndex;
+
+    // ================= START =================
     void Start()
     {
         controller = GetComponent<CharacterController>();
         transform.position = waypoints[0].position;
     }
 
+    // ================= UPDATE =================
     void Update()
     {
-        DetectPlayer();
+        if (currentState == State.Patrol)
+            DetectPlayer();
 
         switch (currentState)
         {
@@ -55,30 +66,38 @@ public class NPCPatrolTalkAI : MonoBehaviour
         }
     }
 
-    // ---------------- DETECT ----------------
+    // ================= DETECT =================
     void DetectPlayer()
     {
-        if (currentState == State.Talk || currentState == State.Stun) return;
-
         Collider[] hits = Physics.OverlapSphere(
             transform.position,
             detectRadius,
             playerLayer
         );
 
-        if (hits.Length > 0)
+        if (hits.Length == 0) return;
+
+        Transform target = hits[0].transform;
+
+        Vector3 origin = transform.position + Vector3.up * 0.8f;
+        Vector3 targetPos = target.position + Vector3.up * 0.8f;
+        Vector3 dir = targetPos - origin;
+        float distance = dir.magnitude;
+
+        RaycastHit hit;
+        if (Physics.Raycast(origin, dir.normalized, out hit, distance, ~0))
         {
-            player = hits[0].transform;
-            currentState = State.Chase;
-        }
-        else if (currentState == State.Chase)
-        {
-            player = null;
-            currentState = State.Patrol;
+            if (hit.transform.CompareTag("Player"))
+            {
+                player = target;
+                patrolReturnIndex = index;
+                lostSightTimer = 0f;
+                currentState = State.Chase;
+            }
         }
     }
 
-    // ---------------- PATROL ----------------
+    // ================= PATROL =================
     void Patrol()
     {
         Vector3 target = waypoints[index].position;
@@ -96,7 +115,7 @@ public class NPCPatrolTalkAI : MonoBehaviour
                     dir *= -1;
                     index += dir * 2;
                 }
-                waitTimer = 0;
+                waitTimer = 0f;
             }
             return;
         }
@@ -105,38 +124,75 @@ public class NPCPatrolTalkAI : MonoBehaviour
         Rotate(dirMove);
     }
 
-    // ---------------- CHASE ----------------
+    // ================= CHASE =================
     void Chase()
     {
-        if (player == null) return;
+        if (player == null)
+        {
+            ResetToPatrol();
+            return;
+        }
 
-        Vector3 dirMove = player.position - transform.position;
-        dirMove.y = 0;
+        float distanceToPlayer = Vector3.Distance(
+            transform.position,
+            player.position
+        );
 
-        if (dirMove.magnitude <= talkDistance)
+        //  หลุดโซน AI
+        if (distanceToPlayer > detectRadius)
+        {
+            ResetToPatrol();
+            return;
+        }
+
+        Vector3 origin = transform.position + Vector3.up * 0.8f;
+        Vector3 targetPos = player.position + Vector3.up * 0.8f;
+        Vector3 dir = targetPos - origin;
+
+        //  เช็คกำแพงบัง
+        RaycastHit hit;
+        if (Physics.Raycast(origin, dir.normalized, out hit, dir.magnitude, ~0))
+        {
+            if (!hit.transform.CompareTag("Player"))
+            {
+                lostSightTimer += Time.deltaTime;
+                if (lostSightTimer >= lostSightDelay)
+                {
+                    ResetToPatrol();
+                    return;
+                }
+            }
+            else
+            {
+                lostSightTimer = 0f;
+            }
+        }
+
+        // เข้า Talk
+        if (distanceToPlayer <= talkDistance)
         {
             StartTalk();
             return;
         }
 
-        controller.Move(dirMove.normalized * chaseSpeed * Time.deltaTime);
-        Rotate(dirMove);
+        //  ไล่
+        dir.y = 0;
+        controller.Move(dir.normalized * chaseSpeed * Time.deltaTime);
+        Rotate(dir);
     }
 
-    // ---------------- TALK ----------------
+    // ================= TALK =================
     void StartTalk()
     {
         currentState = State.Talk;
 
-        // ปิดการควบคุมผู้เล่น
         if (playerMovement != null)
             playerMovement.enabled = false;
 
-        // บังคับอนิเมชันเป็น Idle
         if (playerAnimator != null)
         {
             playerAnimator.SetFloat("Speed", 0f);
-            playerAnimator.Play("Idle", 0, 0f); // ป้องกันเฟรมค้าง
+            playerAnimator.Play("Idle", 0, 0f);
         }
 
         qteUI.StartQTE(this);
@@ -151,19 +207,26 @@ public class NPCPatrolTalkAI : MonoBehaviour
             playerMovement.enabled = true;
     }
 
-
-
-    // ---------------- STUN ----------------
+    // ================= STUN =================
     void Stun()
     {
         stunTimer -= Time.deltaTime;
         if (stunTimer <= 0f)
         {
-            currentState = State.Patrol;
+            ResetToPatrol();
         }
     }
 
-    // ---------------- UTILS ----------------
+    // ================= RESET =================
+    void ResetToPatrol()
+    {
+        player = null;
+        lostSightTimer = 0f;
+        index = patrolReturnIndex;
+        currentState = State.Patrol;
+    }
+
+    // ================= UTILS =================
     void Rotate(Vector3 dir)
     {
         if (dir == Vector3.zero) return;
