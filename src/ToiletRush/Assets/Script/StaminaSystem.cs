@@ -14,7 +14,7 @@ public class StaminaSystem : MonoBehaviour
 
     [Header("UI")]
     public Slider staminaSlider;
-
+    public StaminaVisualUI staminaVisualUI;
     [Header("Game Over")]
     public GameObject gameOverCanvas;
 
@@ -33,7 +33,9 @@ public class StaminaSystem : MonoBehaviour
     {
         DrainStamina();
         UpdateUI();
+        float percent = currentStamina / maxStamina;
 
+        staminaVisualUI.UpdateStaminaVisual(percent);
         if (uiShake != null)
         {
             bool low = currentStamina / maxStamina <= 0.2f;

@@ -30,9 +30,16 @@ public class GuardAI : MonoBehaviour
     public Renderer visionRenderer;
     public Color normalColor = Color.yellow;
     public Color alertColor = Color.red;
+    [Header("Idle")]
+    public float idleDuration = 1.2f;
+
+    private float idleTimer;
+    private bool isIdling;
 
     private CharacterController controller;
     private Transform player;
+    private Animator animator;
+
 
     private int currentIndex = 0;
     private int direction = 1;
@@ -46,6 +53,8 @@ public class GuardAI : MonoBehaviour
 
     void Start()
     {
+        animator = GetComponent<Animator>();
+
         controller = GetComponent<CharacterController>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
@@ -79,23 +88,34 @@ public class GuardAI : MonoBehaviour
     // ---------- PATROL ----------
     void Patrol()
     {
+        if (isIdling)
+        {
+            idleTimer += Time.deltaTime;
+
+            if (idleTimer >= idleDuration)
+            {
+                isIdling = false;
+                NextPoint();
+            }
+
+            UpdateAnimation(0f);
+            return;
+        }
+
         Vector3 target = waypoints[currentIndex].position;
 
         Vector3 flatPos = new Vector3(transform.position.x, 0, transform.position.z);
         Vector3 flatTarget = new Vector3(target.x, 0, target.z);
 
         MoveTo(target, patrolSpeed);
+        UpdateAnimation(patrolSpeed);
 
         if (Vector3.Distance(flatPos, flatTarget) < 0.4f)
         {
-            waitTimer += Time.deltaTime;
-            if (waitTimer >= waitAtPoint)
-            {
-                NextPoint();
-                waitTimer = 0f;
-            }
+            StartIdle(); //  หยุดยืนก่อน
         }
     }
+
 
 
     void NextPoint()
@@ -164,6 +184,8 @@ public class GuardAI : MonoBehaviour
     // ---------- CHASE ----------
     void ChasePlayer()
     {
+        isIdling = false;
+
         float distance = Vector3.Distance(transform.position, player.position);
 
         if (distance <= catchDistance)
@@ -185,6 +207,8 @@ public class GuardAI : MonoBehaviour
             currentState = State.Search;
             UpdateVisionColor(normalColor);
         }
+        UpdateAnimation(chaseSpeed);
+
     }
 
     // ---------- SEARCH ----------
@@ -192,19 +216,36 @@ public class GuardAI : MonoBehaviour
     {
         searchTimer += Time.deltaTime;
 
+        if (isIdling)
+        {
+            idleTimer += Time.deltaTime;
+
+            if (idleTimer >= idleDuration * 0.5f)
+            {
+                isIdling = false;
+                PickNewSearchPoint();
+            }
+
+            UpdateAnimation(0f);
+            return;
+        }
+
         MoveTo(searchTarget, searchSpeed);
-        CheckVision(); // ระหว่างค้นหายังสามารถเห็นผู้เล่นได้
+        UpdateAnimation(searchSpeed);
+        CheckVision();
 
         if (Vector3.Distance(transform.position, searchTarget) < 0.3f)
         {
-            PickNewSearchPoint();
+            StartIdle(); // หยุดมองรอบ ๆ
         }
 
         if (searchTimer >= searchDuration)
         {
+            isIdling = false;
             currentState = State.Return;
         }
     }
+
 
     void PickNewSearchPoint()
     {
@@ -224,9 +265,13 @@ public class GuardAI : MonoBehaviour
 
         if (Vector3.Distance(flatPos, flatTarget) < 0.4f)
         {
+            StartIdle();
+
             currentIndex = patrolReturnIndex;
             currentState = State.Patrol;
         }
+        UpdateAnimation(patrolSpeed);
+
     }
 
     // ---------- COMMON ----------
@@ -305,6 +350,17 @@ public class GuardAI : MonoBehaviour
         PickNewSearchPoint();
         currentState = State.Search;
         UpdateVisionColor(alertColor);
+    }
+    void UpdateAnimation(float speed)
+    {
+        if (animator == null) return;
+        animator.SetFloat("Speed", speed);
+    }
+    void StartIdle()
+    {
+        isIdling = true;
+        idleTimer = 0f;
+        UpdateAnimation(0f); // Idle animation
     }
 
 
