@@ -1,4 +1,8 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System;
+using System.Collections;
 
 public class SecurityCameraAI : MonoBehaviour
 {
@@ -21,6 +25,11 @@ public class SecurityCameraAI : MonoBehaviour
     public Renderer visionRenderer;
     public Color normalColor = Color.green;
     public Color alertColor = Color.red;
+    [Header("UI Alert Flash")]
+    public GameObject alertImageUI;
+    public float alertImageDuration = 0.8f;
+
+    private Coroutine alertUIRoutine;
 
     private Transform player;
     private float currentAngle;
@@ -116,8 +125,10 @@ public class SecurityCameraAI : MonoBehaviour
     // ---------- ALERT ----------
     void AlertNearestGuard()
     {
+
         canAlert = false;
         UpdateVisionColor(alertColor);
+        ShowAlertUI();
 
         GuardAI[] guards = FindObjectsOfType<GuardAI>();
         GuardAI nearest = null;
@@ -137,6 +148,23 @@ public class SecurityCameraAI : MonoBehaviour
             nearest.Investigate(transform.position);
 
         Invoke(nameof(ResetAlert), alertCooldown);
+    }
+    void ShowAlertUI()
+    {
+        if (alertImageUI == null)
+            return;
+
+        if (alertUIRoutine != null)
+            StopCoroutine(alertUIRoutine);
+
+        alertUIRoutine = StartCoroutine(AlertUIFlash());
+    }
+
+    IEnumerator AlertUIFlash()
+    {
+        alertImageUI.SetActive(true);
+        yield return new WaitForSeconds(alertImageDuration);
+        alertImageUI.SetActive(false);
     }
 
     void ResetAlert()
