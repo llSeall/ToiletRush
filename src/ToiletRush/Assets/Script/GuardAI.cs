@@ -30,6 +30,9 @@ public class GuardAI : MonoBehaviour
     public Renderer visionRenderer;
     public Color normalColor = Color.yellow;
     public Color alertColor = Color.red;
+    [Header("Game Over Image")]
+    public UnityEngine.UI.Image gameOverImage;
+    public Sprite gameOverSprite;
     [Header("Idle")]
     public float idleDuration = 1.2f;
 
@@ -290,13 +293,16 @@ public class GuardAI : MonoBehaviour
             Time.deltaTime * 5f
         );
     }
-
     void CatchPlayer()
     {
         Debug.Log("PLAYER CAUGHT!");
 
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
+
+        // ตั้งค่าภาพเหตุผล Game Over
+        if (gameOverImage != null && gameOverSprite != null)
+            gameOverImage.sprite = gameOverSprite;
 
         Time.timeScale = 0f;
         enabled = false;

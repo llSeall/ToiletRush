@@ -17,6 +17,9 @@ public class StaminaSystem : MonoBehaviour
     public StaminaVisualUI staminaVisualUI;
     [Header("Game Over")]
     public GameObject gameOverCanvas;
+    [Header("Game Over Image")]
+    public UnityEngine.UI.Image gameOverImage;   // ตัว Image บน Canvas
+    public Sprite gameOverSprite;                // รูปเหตุผลของฉากนี้
 
     void Start()
     {
@@ -88,7 +91,8 @@ public class StaminaSystem : MonoBehaviour
 
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
-
+        if (gameOverImage != null && gameOverSprite != null)
+            gameOverImage.sprite = gameOverSprite;
         Time.timeScale = 0f;
         enabled = false;
     }

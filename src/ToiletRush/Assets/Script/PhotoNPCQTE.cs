@@ -12,6 +12,9 @@ public class PhotoNPCQTE : MonoBehaviour
     public QTE_UI_Controller qteUI;
     public MonoBehaviour playerMovementScript;   // ใส่สคริปต์เดินของผู้เล่น
     public Animator playerAnimator;
+    [Header("Game Over Image")]
+    public UnityEngine.UI.Image gameOverImage;   // ตัว Image บน Canvas
+    public Sprite gameOverSprite;                // รูปเหตุผลของฉากนี้
 
     [Header("Animation Parameter")]
     public string poseTriggerName = "Pose"; // Trigger ใน Animator
@@ -53,8 +56,11 @@ public class PhotoNPCQTE : MonoBehaviour
 
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
-
+        if (gameOverImage != null && gameOverSprite != null)
+            gameOverImage.sprite = gameOverSprite;
         Time.timeScale = 0f;
+        enabled = false;
+
     }
 
 
