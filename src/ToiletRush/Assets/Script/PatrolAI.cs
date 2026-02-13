@@ -3,6 +3,8 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class PatrolAI : MonoBehaviour
 {
+    private Animator animator;
+
     public Transform[] waypoints;
     public float moveSpeed = 2f;
     public float waitTimeAtPoint = 0.5f;
@@ -15,14 +17,15 @@ public class PatrolAI : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        animator = GetComponentInChildren<Animator>();
         transform.position = waypoints[0].position;
     }
+
 
     void Update()
     {
         Patrol();
     }
-
     void Patrol()
     {
         if (waypoints.Length == 0) return;
@@ -34,17 +37,21 @@ public class PatrolAI : MonoBehaviour
         if (moveDir.magnitude < 0.1f)
         {
             waitTimer += Time.deltaTime;
+
+            if (animator != null)
+                animator.SetFloat("Speed", 0f); // Idle
+
             if (waitTimer >= waitTimeAtPoint)
             {
                 NextPoint();
                 waitTimer = 0f;
             }
+
             return;
         }
 
         controller.Move(moveDir.normalized * moveSpeed * Time.deltaTime);
 
-        // หันหน้าไปทิศที่เดิน
         if (moveDir != Vector3.zero)
         {
             transform.rotation = Quaternion.Slerp(
@@ -53,7 +60,11 @@ public class PatrolAI : MonoBehaviour
                 Time.deltaTime * 5f
             );
         }
+
+        if (animator != null)
+            animator.SetFloat("Speed", 1f); // Walk
     }
+
 
     void NextPoint()
     {
