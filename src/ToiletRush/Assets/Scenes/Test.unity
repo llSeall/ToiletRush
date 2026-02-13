@@ -5892,7 +5892,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1064989317
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7261,7 +7261,7 @@ GameObject:
   - component: {fileID: 1447040541}
   - component: {fileID: 1447040540}
   m_Layer: 5
-  m_Name: 02
+  m_Name: Target
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9299,7 +9299,7 @@ GameObject:
   - component: {fileID: 1939194804}
   - component: {fileID: 1939194803}
   m_Layer: 5
-  m_Name: 01
+  m_Name: Progress
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
