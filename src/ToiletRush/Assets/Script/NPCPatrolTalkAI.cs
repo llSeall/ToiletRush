@@ -3,11 +3,14 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class NPCPatrolTalkAI : MonoBehaviour
 {
+    private Animator animator;
+
     public enum State { Patrol, Chase, Talk, Stun }
     public State currentState = State.Patrol;
 
     [Header("Player Animation")]
     public Animator playerAnimator;
+    private State previousState;
 
     [Header("Patrol")]
     public Transform[] waypoints;
@@ -48,14 +51,22 @@ public class NPCPatrolTalkAI : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        animator = GetComponentInChildren<Animator>();
         transform.position = waypoints[0].position;
     }
+
 
     // ================= UPDATE =================
     void Update()
     {
         if (currentState == State.Patrol)
             DetectPlayer();
+
+        if (currentState != previousState)
+        {
+            UpdateAnimationByState();
+            previousState = currentState;
+        }
 
         switch (currentState)
         {
@@ -65,6 +76,7 @@ public class NPCPatrolTalkAI : MonoBehaviour
             case State.Stun: Stun(); break;
         }
     }
+
 
     // ================= DETECT =================
     void DetectPlayer()
@@ -122,11 +134,23 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
         controller.Move(dirMove.normalized * moveSpeed * Time.deltaTime);
         Rotate(dirMove);
+        if (animator != null)
+        {
+            animator.SetBool("IsTalking", false);
+            animator.SetFloat("Speed", dirMove.magnitude > 0.1f ? 1f : 0f);
+        }
+
     }
 
     // ================= CHASE =================
     void Chase()
     {
+        if (animator != null)
+        {
+            animator.SetBool("IsTalking", false);
+            animator.SetFloat("Speed", 1f);
+        }
+
         if (player == null)
         {
             ResetToPatrol();
@@ -184,19 +208,37 @@ public class NPCPatrolTalkAI : MonoBehaviour
     // ================= TALK =================
     void StartTalk()
     {
+        Debug.Log("StartTalk called");
+
         currentState = State.Talk;
+
+        // ให้ผู้เล่นหันมาหา NPC
+        Vector3 lookDir = transform.position - player.transform.position;
+        lookDir.y = 0;
+        player.transform.rotation = Quaternion.LookRotation(lookDir);
 
         if (playerMovement != null)
             playerMovement.enabled = false;
 
+        // ===== PLAYER ANIMATION =====
         if (playerAnimator != null)
         {
             playerAnimator.SetFloat("Speed", 0f);
-            playerAnimator.Play("Idle", 0, 0f);
+            playerAnimator.SetBool("IsRunning", false);
+            playerAnimator.SetBool("IsTalking", true);
+        }
+
+        // ===== NPC ANIMATION =====
+        if (animator != null)
+        {
+            animator.SetFloat("Speed", 0f);
+            animator.SetBool("IsTalking", true);   //  ตัวสำคัญ
         }
 
         qteUI.StartQTE(this);
     }
+
+
 
     public void OnQTESuccess()
     {
@@ -205,7 +247,14 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
         if (playerMovement != null)
             playerMovement.enabled = true;
+
+        if (playerAnimator != null)
+            playerAnimator.SetBool("IsTalking", false); //  ปิดท่าคุย
+
+        if (animator != null)
+            animator.SetBool("IsTalking", false);
     }
+
 
     // ================= STUN =================
     void Stun()
@@ -236,6 +285,33 @@ public class NPCPatrolTalkAI : MonoBehaviour
             Quaternion.LookRotation(dir),
             Time.deltaTime * 5f
         );
+    }
+    void UpdateAnimationByState()
+    {
+        if (animator == null) return;
+
+        switch (currentState)
+        {
+            case State.Patrol:
+                animator.SetBool("IsTalking", false);
+                animator.SetFloat("Speed", 1f);
+                break;
+
+            case State.Chase:
+                animator.SetBool("IsTalking", false);
+                animator.SetFloat("Speed", 1f);
+                break;
+
+            case State.Talk:
+                animator.SetFloat("Speed", 0f);
+                animator.SetBool("IsTalking", true);
+                break;
+
+            case State.Stun:
+                animator.SetBool("IsTalking", false);
+                animator.SetFloat("Speed", 0f);
+                break;
+        }
     }
 
 #if UNITY_EDITOR

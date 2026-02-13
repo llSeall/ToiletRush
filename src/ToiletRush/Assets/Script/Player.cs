@@ -1,4 +1,7 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using System.Collections;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement3D : MonoBehaviour
@@ -8,6 +11,9 @@ public class PlayerMovement3D : MonoBehaviour
     public float runSpeed = 7f;
     public float gravity = -9.81f;
     public float knockbackDamping = 8f;
+    [Header("External Speed Modifier")]
+    [Range(0.1f, 1f)]
+    public float speedMultiplier = 1f;
 
     [Header("Rotation")]
     public float rotateSpeed = 10f;
@@ -20,6 +26,7 @@ public class PlayerMovement3D : MonoBehaviour
 
     private Quaternion cameraInitialRotation;
     private Vector3 cameraVelocity;
+    private bool isHit = false;
 
     private Animator animator;
     private CharacterController controller;
@@ -39,7 +46,8 @@ public class PlayerMovement3D : MonoBehaviour
 
     void Update()
     {
-        Move();
+        if (!isHit)
+            Move();
         ApplyGravity();
         ApplyKnockback();
     }
@@ -70,13 +78,16 @@ public class PlayerMovement3D : MonoBehaviour
 
     void Move()
     {
+        if (isHit) return;
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
         Vector3 inputDir = new Vector3(h, 0, v);
 
         bool isRunning = Input.GetKey(KeyCode.LeftShift);
-        float speed = isRunning ? runSpeed : walkSpeed;
+        float baseSpeed = isRunning ? runSpeed : walkSpeed;
+        float speed = baseSpeed * speedMultiplier;
+
 
         if (inputDir.magnitude > 0.1f)
         {
@@ -130,10 +141,40 @@ public class PlayerMovement3D : MonoBehaviour
             knockbackDamping * Time.deltaTime
         );
     }
+    public void SetSlowZone(bool value)
+    {
+        speedMultiplier = value ? 0.4f : 1f;
 
+        if (animator != null)
+            animator.SetBool("Act", value);
+    }
     public void OnHitByNPC(float shakePower = 1f)
     {
+        if (isHit) return;
+
+        isHit = true;
+
         if (cameraShake != null)
             cameraShake.Shake(shakePower);
+
+        if (animator != null)
+            animator.SetTrigger("Hit");
+
+        StartCoroutine(HitRecoverRoutine());
+
     }
+    IEnumerator HitRecoverRoutine()
+    {
+        // รอให้เข้า state Hit ก่อน
+        yield return null;
+
+        // ดึงความยาวคลิปจริง
+        float clipLength = animator.GetCurrentAnimatorStateInfo(0).length;
+
+        yield return new WaitForSeconds(clipLength);
+
+        isHit = false;
+    }
+
+
 }

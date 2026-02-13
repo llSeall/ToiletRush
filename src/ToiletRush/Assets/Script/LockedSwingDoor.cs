@@ -55,8 +55,7 @@ public class LockedSwingDoor : MonoBehaviour
                 blockCollider.enabled = false;
         }
     }
-
-    void OnTriggerEnter(Collider other)
+    void OnTriggerStay(Collider other)
     {
         if (isOpen || isOpening) return;
         if (!other.CompareTag("Player")) return;
@@ -66,7 +65,7 @@ public class LockedSwingDoor : MonoBehaviour
 
         if (inventory == null) return;
 
-        //  ‰¡Ë¡’°ÿ≠·®
+        // ‰¡Ë¡’°ÿ≠·®
         if (!inventory.HasKey(requiredKeyID))
         {
             Debug.Log("Door locked, need key: " + requiredKeyID);
@@ -77,8 +76,9 @@ public class LockedSwingDoor : MonoBehaviour
             return;
         }
 
-        //  ¡’°ÿ≠·® ‡ª‘¥ª√–µŸ
+        // ¡’°ÿ≠·® ‡ª‘¥ª√–µŸ
         Debug.Log("Key accepted, opening door");
         isOpening = true;
     }
+
 }

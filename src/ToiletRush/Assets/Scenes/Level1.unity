@@ -414,6 +414,7 @@ MonoBehaviour:
   runSpeed: 17
   gravity: -9
   knockbackDamping: 8
+  speedMultiplier: 1
   rotateSpeed: 10
   playerCamera: {fileID: 963194228}
   cameraOffset: {x: 0, y: 15, z: 0}
@@ -14963,13 +14964,13 @@ MonoBehaviour:
   moveSpeed: 5
   waitTimeAtPoint: 0.5
   detectRadius: 9.98
-  talkDistance: 1.5
+  talkDistance: 2.5
   playerLayer:
     serializedVersion: 2
     m_Bits: 8
   obstacleMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
   chaseSpeed: 6
   lostSightDelay: 0.6
   playerMovement: {fileID: 48189790}
