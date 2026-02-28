@@ -5,11 +5,14 @@ public class TriggerReduceStamina : MonoBehaviour
     public float staminaReduceAmount = 10f;
     public bool destroyAfterTrigger = false;
 
+    //[Header("Animation")]
+    //public string hitTriggerName = "Hit2";
+
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
 
-        // หา StaminaSystem จาก Parent ด้วย
+        // ===== ลด Stamina =====
         StaminaSystem stamina = other.GetComponentInParent<StaminaSystem>();
 
         if (stamina != null)
@@ -22,6 +25,18 @@ public class TriggerReduceStamina : MonoBehaviour
             Debug.LogError("StaminaSystem NOT FOUND on Player");
         }
 
+        // ===== เรียก Animation =====
+        //Animator anim = other.GetComponentInParent<Animator>();
+        //if (anim != null)
+        //{
+        //    anim.SetTrigger(hitTriggerName);
+        //}
+        //else
+        //{
+        //    Debug.LogError("Animator NOT FOUND on Player");
+        //}
+
+        // ===== ทำลายวัตถุ =====
         if (destroyAfterTrigger)
         {
             Destroy(gameObject);
