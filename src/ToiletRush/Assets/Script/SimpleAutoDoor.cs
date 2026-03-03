@@ -2,13 +2,22 @@ using UnityEngine;
 
 public class SimpleSwingDoor : MonoBehaviour
 {
+    public enum DoorMode
+    {
+        OpenOnTrigger,   // ชนแล้วเปิดเลย
+        RequireQTE       // ต้องเรียก OpenDoor() เอง
+    }
+
+    [Header("Door Mode")]
+    public DoorMode doorMode = DoorMode.OpenOnTrigger;
+
     [Header("Door Setting")]
     public float openAngle = 90f;
     public float openSpeed = 3f;
     public bool openToRight = true;
 
     [Header("Collider")]
-    public Collider blockCollider; // ตัวที่กันผู้เล่น
+    public Collider blockCollider;
 
     private bool isOpening = false;
     private bool isOpen = false;
@@ -38,14 +47,12 @@ public class SimpleSwingDoor : MonoBehaviour
             Time.deltaTime * openSpeed
         );
 
-        // เช็คว่าเปิดสุดแล้วหรือยัง
         if (Quaternion.Angle(transform.rotation, openRot) < 0.5f)
         {
             transform.rotation = openRot;
             isOpening = false;
             isOpen = true;
 
-            // เปิดทางให้เดินผ่าน
             if (blockCollider != null)
                 blockCollider.enabled = false;
 
@@ -55,12 +62,22 @@ public class SimpleSwingDoor : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        if (doorMode != DoorMode.OpenOnTrigger) return;
         if (isOpen || isOpening) return;
 
         if (other.CompareTag("Player"))
         {
             isOpening = true;
-            Debug.Log("Door opening...");
+            Debug.Log("Door opening (Normal Mode)");
         }
+    }
+
+    //  เรียกจาก QTE เท่านั้น
+    public void OpenDoor()
+    {
+        if (isOpen || isOpening) return;
+
+        isOpening = true;
+        Debug.Log("Door opening (QTE Mode)");
     }
 }
