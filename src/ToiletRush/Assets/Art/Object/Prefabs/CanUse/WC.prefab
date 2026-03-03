@@ -99,6 +99,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7129ce750f8186f4cb7832649cf2eba5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  winCondition: 1
+  quest: {fileID: 0}
   winCanvas: {fileID: 0}
   starUI: {fileID: 0}
   levelName: Level1
@@ -133,7 +135,7 @@ Animator:
   m_GameObject: {fileID: 6494618680293837270}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 41fa26e1100b55048a3e1dabfd53ebb0, type: 2}
+  m_Controller: {fileID: 9100000, guid: 058ec75576e2ad54f9d71e302d15a473, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

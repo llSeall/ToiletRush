@@ -7,7 +7,8 @@ public class DoorQTESwing : MonoBehaviour
     [Header("UI")]
     public GameObject qteUI;
     public Image progressCircle;
-
+    [Header("Animation")]
+    public Animator playerAnimator;
     [Header("QTE Setting")]
     public float increasePerPress = 0.1f;
     public float decayPerSecond = 0.3f;
@@ -16,13 +17,14 @@ public class DoorQTESwing : MonoBehaviour
 
     [Header("Control")]
     public MonoBehaviour playerMovement;
-
+    private bool hasTriggered = false;
     private float progress;
     private bool active;
     private SimpleSwingDoor door;
 
     void Start()
     {
+
         door = GetComponent<SimpleSwingDoor>();
         qteUI.SetActive(false);
     }
@@ -53,31 +55,42 @@ public class DoorQTESwing : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
         if (active) return;
+        if (hasTriggered) return;   //  กันชนซ้ำ
 
+        hasTriggered = true;        //  บันทึกว่าเคยชนแล้ว
         StartQTE();
     }
-
     void StartQTE()
     {
+        if (playerAnimator != null)
+            playerAnimator.SetBool("IsShakingDoor", true);
+
         progress = 0f;
         active = true;
 
         if (playerMovement != null)
             playerMovement.enabled = false;
 
+        if (playerAnimator != null)
+
         progressCircle.fillAmount = 0f;
         progressCircle.transform.localScale = Vector3.one * startScale;
 
         qteUI.SetActive(true);
     }
-
     void Success()
     {
+        if (playerAnimator != null)
+
+            playerAnimator.SetBool("IsShakingDoor", false);
+
         active = false;
         qteUI.SetActive(false);
 
         if (playerMovement != null)
             playerMovement.enabled = true;
+
+        if (playerAnimator != null)
 
         door.OpenDoor();
     }
