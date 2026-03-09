@@ -77,6 +77,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WC (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 7512944174059678540, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8759589872863209426, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.4363168

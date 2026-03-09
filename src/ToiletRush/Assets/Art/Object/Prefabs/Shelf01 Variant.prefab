@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Size.x
       value: 4.84
       objectReference: {fileID: 0}
+    - target: {fileID: 2932334677449972719, guid: 237835c81dbd0ef45933c6b82289ebf1, type: 3}
+      propertyPath: m_Size.z
+      value: 1.16
+      objectReference: {fileID: 0}
     - target: {fileID: 3066353906391459254, guid: 237835c81dbd0ef45933c6b82289ebf1, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.329576
@@ -72,6 +76,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: -146722386, guid: 93cc63c2bfbca09438f17f64abb34920, type: 3}
+    - target: {fileID: 6583816173727306556, guid: 237835c81dbd0ef45933c6b82289ebf1, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

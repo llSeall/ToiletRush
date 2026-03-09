@@ -25,7 +25,7 @@ public class StaminaSystem : MonoBehaviour
     {
         uiShake = staminaSlider.GetComponentInParent<StaminaUIShake>();
         currentStamina = maxStamina;
-
+         
         if (staminaSlider != null)
         {
             staminaSlider.maxValue = maxStamina;
