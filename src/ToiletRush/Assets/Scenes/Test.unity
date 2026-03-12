@@ -418,10 +418,10 @@ MonoBehaviour:
   - {fileID: 1360927535}
   - {fileID: 1404100778}
   - {fileID: 1636507859}
-  upSprite: {fileID: 21300000, guid: 94c7499f73656204c8360229c6314e92, type: 3}
-  downSprite: {fileID: 21300000, guid: d4a96c42f026e2745861d5d49d52ef19, type: 3}
-  leftSprite: {fileID: 21300000, guid: 0b808ac73ecfe6b47b3db82c1f572194, type: 3}
-  rightSprite: {fileID: 21300000, guid: f134882441d41fb4b9b56df930ca7b9e, type: 3}
+  upSprite: {fileID: 21300000, guid: 11069e172141e844080696f7da7acea6, type: 3}
+  downSprite: {fileID: 21300000, guid: 04d9504a73ca50e4392a3d04aeecaa48, type: 3}
+  leftSprite: {fileID: 21300000, guid: daae0fadd2ae04646a2dea168adcadd8, type: 3}
+  rightSprite: {fileID: 21300000, guid: 6671a5db5546d424496852208743d170, type: 3}
   playerMovementScript: {fileID: 48189790}
 --- !u!1 &40621426
 GameObject:
@@ -2275,17 +2275,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 424910468}
   m_CullTransparentMesh: 1
---- !u!114 &561639348 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6280242618293697085, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
-  m_PrefabInstance: {fileID: 8683743044259584129}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f9340c0ebfefbd4096a9b400fd13548, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &568380306
 GameObject:
   m_ObjectHideFlags: 0
@@ -3487,6 +3476,28 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 711378186}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &713573888 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7009466334285792181, guid: c4adc43e75822594fb20d2406bef13b6, type: 3}
+  m_PrefabInstance: {fileID: 2087532288175632075}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e00790852b00c34f988da803d81f0f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &713573889 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 299220260166516976, guid: c4adc43e75822594fb20d2406bef13b6, type: 3}
+  m_PrefabInstance: {fileID: 2087532288175632075}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fcaedbd9bdcc96449826cacd02c0728, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &730563378
 GameObject:
   m_ObjectHideFlags: 0
@@ -11213,6 +11224,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1744430338}
   m_CullTransparentMesh: 1
+--- !u!114 &1747417094 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6858291489200633089, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
+  m_PrefabInstance: {fileID: 8683743044259584129}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e00790852b00c34f988da803d81f0f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1758149653
 GameObject:
   m_ObjectHideFlags: 0
@@ -12918,6 +12940,10 @@ PrefabInstance:
       propertyPath: playerAnimator
       value: 
       objectReference: {fileID: 48189786}
+    - target: {fileID: 7009466334285792181, guid: c4adc43e75822594fb20d2406bef13b6, type: 3}
+      propertyPath: startMiniGameTrigger
+      value: 
+      objectReference: {fileID: 713573889}
     - target: {fileID: 8108751220883659590, guid: c4adc43e75822594fb20d2406bef13b6, type: 3}
       propertyPath: m_Name
       value: Quest
@@ -14327,7 +14353,7 @@ PrefabInstance:
     - target: {fileID: 3730412253072869360, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
       propertyPath: quest
       value: 
-      objectReference: {fileID: 561639348}
+      objectReference: {fileID: 713573888}
     - target: {fileID: 3730412253072869360, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
       propertyPath: starUI
       value: 
@@ -14960,6 +14986,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: QuestSP
       objectReference: {fileID: 0}
+    - target: {fileID: 4069545105579829475, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
+      propertyPath: quest
+      value: 
+      objectReference: {fileID: 1747417094}
+    - target: {fileID: 4069545105579829475, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
+      propertyPath: triggerType
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5055903122418367870, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -15008,6 +15042,22 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6858291489200633089, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
+      propertyPath: qteSystem
+      value: 
+      objectReference: {fileID: 36075556}
+    - target: {fileID: 6858291489200633089, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
+      propertyPath: playerAnimator
+      value: 
+      objectReference: {fileID: 48189786}
+    - target: {fileID: 8398290685952436651, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
+      propertyPath: quest
+      value: 
+      objectReference: {fileID: 1747417094}
+    - target: {fileID: 8398290685952436651, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
+      propertyPath: triggerType
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -15031,7 +15081,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9210082934367165958, guid: b43ee5b8151e4d344bab45a40d6cbad4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 9.14
+      value: 9.54
       objectReference: {fileID: 0}
     - target: {fileID: 9210082934367165958, guid: b43ee5b8151e4d344bab45a40d6cbad4, type: 3}
       propertyPath: m_LocalPosition.y
@@ -15039,7 +15089,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9210082934367165958, guid: b43ee5b8151e4d344bab45a40d6cbad4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -18.88
+      value: -17.89
       objectReference: {fileID: 0}
     - target: {fileID: 9210082934367165958, guid: b43ee5b8151e4d344bab45a40d6cbad4, type: 3}
       propertyPath: m_LocalRotation.w

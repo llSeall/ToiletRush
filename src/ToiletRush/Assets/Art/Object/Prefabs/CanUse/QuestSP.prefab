@@ -120,7 +120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   triggerType: 1
-  quest: {fileID: 6280242618293697085}
+  quest: {fileID: 0}
   useImageEffect: 1
   imgEffect: {fileID: 582728560520930168}
 --- !u!1 &1018921429619631342
@@ -230,7 +230,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5558450857932887087}
-  - component: {fileID: 6280242618293697085}
+  - component: {fileID: 6858291489200633089}
   m_Layer: 0
   m_Name: QuestSP
   m_TagString: Untagged
@@ -258,7 +258,7 @@ Transform:
   - {fileID: 1445484872107191603}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6280242618293697085
+--- !u!114 &6858291489200633089
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -267,12 +267,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1231684157363276601}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f9340c0ebfefbd4096a9b400fd13548, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e00790852b00c34f988da803d81f0f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  questName: 03
-  pickupObject: {fileID: 1274939409413333416}
-  dropoffObject: {fileID: 208776072280806268}
+  questName: Minidelivery
+  playerAnimator: {fileID: 0}
+  qteSystem: {fileID: 0}
+  requireDeliveryAfterMiniGame: 1
+  startMiniGameTrigger: {fileID: 8398290685952436651}
+  miniGameCompleted: 0
 --- !u!1 &1274939409413333416
 GameObject:
   m_ObjectHideFlags: 0
@@ -393,7 +396,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   triggerType: 0
-  quest: {fileID: 6280242618293697085}
+  quest: {fileID: 0}
   useImageEffect: 0
   imgEffect: {fileID: 0}
 --- !u!1 &5055903122418367870

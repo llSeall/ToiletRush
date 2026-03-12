@@ -6,15 +6,16 @@ public class QuestTrigger : MonoBehaviour
     {
         PickUp,
         Deliver,
-        StartMiniGame
+        StartMiniGame,
+        MiniGameDeliver
     }
 
     public TriggerType triggerType;
     public QuestBase quest;
 
     [Header("Optional Image Effect")]
-    public bool useImageEffect = false;   // << เปิดปิดการใช้ภาพ
-    public ImgTriggerEffect imgEffect;    // << ลากสคริปต์ภาพมาใส่
+    public bool useImageEffect = false;
+    public ImgTriggerEffect imgEffect;
 
     private void Start()
     {
@@ -22,7 +23,6 @@ public class QuestTrigger : MonoBehaviour
         {
             quest.OnQuestCompleted += OnQuestCompleted;
         }
-
         GetComponent<Collider>().isTrigger = true;
     }
 
@@ -33,10 +33,10 @@ public class QuestTrigger : MonoBehaviour
             quest.OnQuestCompleted -= OnQuestCompleted;
         }
     }
-
     private void OnQuestCompleted()
     {
-        if (triggerType == TriggerType.StartMiniGame)
+        if (triggerType == TriggerType.Deliver ||
+            triggerType == TriggerType.MiniGameDeliver)
         {
             gameObject.SetActive(false);
         }
@@ -58,8 +58,6 @@ public class QuestTrigger : MonoBehaviour
                 if (quest is DeliveryQuest deliveryQuest2)
                 {
                     deliveryQuest2.DeliverItem();
-
-                    //  เรียกภาพเฉพาะกรณีที่เปิดไว้
                     if (useImageEffect && imgEffect != null)
                         imgEffect.PlayEffect();
                 }
@@ -69,6 +67,16 @@ public class QuestTrigger : MonoBehaviour
                 if (quest is MiniGameQuest miniGameQuest)
                     miniGameQuest.StartMiniGame();
                 break;
+
+            case TriggerType.MiniGameDeliver:
+                if (quest is MiniGameQuest miniGameQuest2)
+                {
+                    miniGameQuest2.DeliverAfterMiniGame();
+                    if (useImageEffect && imgEffect != null)
+                        imgEffect.PlayEffect();
+                }
+                break;
+
         }
     }
 }

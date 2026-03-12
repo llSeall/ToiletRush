@@ -5,13 +5,12 @@ using System.Collections.Generic;
 public class MiniGameQTE : MonoBehaviour
 {
     public GameObject qtePanel;
-    public Image[] arrowSlots; // 5 ช่อง
+    public Image[] arrowSlots;
     public Sprite upSprite;
     public Sprite downSprite;
     public Sprite leftSprite;
     public Sprite rightSprite;
-
-    public MonoBehaviour playerMovementScript; // ลากสคริปต์ควบคุมเดินใส่
+    public MonoBehaviour playerMovementScript;
 
     private List<KeyCode> sequence = new List<KeyCode>();
     private int currentIndex = 0;
@@ -20,14 +19,10 @@ public class MiniGameQTE : MonoBehaviour
     public void StartQTE(MiniGameQuest quest)
     {
         Debug.Log("StartQTE called");
-
         currentQuest = quest;
-
         GenerateSequence();
         ShowSequence();
-
         qtePanel.SetActive(true);
-
         if (playerMovementScript != null)
             playerMovementScript.enabled = false;
     }
@@ -36,9 +31,7 @@ public class MiniGameQTE : MonoBehaviour
     {
         sequence.Clear();
         currentIndex = 0;
-
         KeyCode[] keys = { KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow };
-
         for (int i = 0; i < 5; i++)
         {
             KeyCode randomKey = keys[Random.Range(0, keys.Length)];
@@ -51,7 +44,6 @@ public class MiniGameQTE : MonoBehaviour
         for (int i = 0; i < arrowSlots.Length; i++)
         {
             if (i >= sequence.Count) break;
-
             arrowSlots[i].sprite = GetSprite(sequence[i]);
             arrowSlots[i].color = Color.white;
         }
@@ -72,14 +64,11 @@ public class MiniGameQTE : MonoBehaviour
     void Update()
     {
         if (!qtePanel.activeSelf) return;
-
         if (currentIndex >= sequence.Count) return;
-
         if (Input.GetKeyDown(sequence[currentIndex]))
         {
             arrowSlots[currentIndex].color = Color.green;
             currentIndex++;
-
             if (currentIndex >= sequence.Count)
             {
                 CompleteQTE();
@@ -90,10 +79,8 @@ public class MiniGameQTE : MonoBehaviour
     void CompleteQTE()
     {
         qtePanel.SetActive(false);
-
         if (playerMovementScript != null)
             playerMovementScript.enabled = true;
-
         if (currentQuest != null)
             currentQuest.MiniGameSuccess();
     }
