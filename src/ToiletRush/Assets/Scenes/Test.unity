@@ -559,7 +559,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 4
-  runSpeed: 7
+  runSpeed: 10
   gravity: -9
   knockbackDamping: 8
   speedMultiplier: 1
@@ -14098,7 +14098,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6720718711321681487, guid: 5e7e52f7b1e3a09408afe38b46caee7b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -6.94
+      value: -3.6
       objectReference: {fileID: 0}
     - target: {fileID: 6720718711321681487, guid: 5e7e52f7b1e3a09408afe38b46caee7b, type: 3}
       propertyPath: m_LocalPosition.y
@@ -14106,7 +14106,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6720718711321681487, guid: 5e7e52f7b1e3a09408afe38b46caee7b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -17.51
+      value: -18.81
       objectReference: {fileID: 0}
     - target: {fileID: 6720718711321681487, guid: 5e7e52f7b1e3a09408afe38b46caee7b, type: 3}
       propertyPath: m_LocalRotation.w
