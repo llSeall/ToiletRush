@@ -12,7 +12,8 @@ public class NPCPatrolReduceStamina : MonoBehaviour
     public float staminaReduceAmount = 10f;
     public float knockbackForce = 6f;
     public float hitCooldown = 5f;
-
+    [Header("VFX")]
+    public GameObject hitVFX;
     private CharacterController controller;
     private int index;
     private int dir = 1;
@@ -85,18 +86,22 @@ public class NPCPatrolReduceStamina : MonoBehaviour
 
         if (player == null || stamina == null) return;
 
-        // Ŵ stamina
+        // spawn explosion effect
+        if (hitVFX != null)
+        {
+            Instantiate(hitVFX, other.transform.position, Quaternion.identity);
+        }
+
         stamina.ReduceStamina(staminaReduceAmount);
 
-        // knockback
         Vector3 dir = (other.transform.position - transform.position).normalized;
         dir.y = 0;
         player.AddKnockback(dir * knockbackForce);
 
         canHit = false;
         Invoke(nameof(ResetHit), hitCooldown);
-        player.OnHitByNPC(1f);
 
+        player.OnHitByNPC(1f);
     }
 
     void ResetHit()

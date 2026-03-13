@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 8dce911f990c7154783f03069de0da46
+guid: 8d30b716b1813df46bfc34dcd423d40a
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -33,7 +33,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: SitSofa03
+      name: SitSofa02
       takeName: Take 001
       internalID: 1827226128182048838
       firstFrame: 1
