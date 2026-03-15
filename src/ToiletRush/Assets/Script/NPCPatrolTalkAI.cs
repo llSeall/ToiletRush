@@ -14,9 +14,9 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
     [Header("Patrol")]
     public Transform[] waypoints;
+    public bool standStillIfNoWaypoint = true;
     public float moveSpeed = 2f;
     public float waitTimeAtPoint = 0.5f;
-
     [Header("Detect (AI Zone)")]
     public float detectRadius = 5f;
     public float talkDistance = 1.5f;
@@ -52,7 +52,10 @@ public class NPCPatrolTalkAI : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
-        transform.position = waypoints[0].position;
+        if (waypoints != null && waypoints.Length > 0)
+        {
+            transform.position = waypoints[0].position;
+        }
     }
 
 
@@ -115,7 +118,23 @@ public class NPCPatrolTalkAI : MonoBehaviour
         Vector3 target = waypoints[index].position;
         Vector3 dirMove = target - transform.position;
         dirMove.y = 0;
+        // ===== ไม่มี waypoint = ยืนนิ่ง =====
+        if (waypoints == null || waypoints.Length <= 1)
+        {
+            if (animator != null)
+            {
+                animator.SetBool("IsTalking", false);
+                animator.SetFloat("Speed", 0f);
+            }
+            return;
+        }
 
+        // ===== ป้องกัน index หลุด =====
+        if (index >= waypoints.Length)
+            index = waypoints.Length - 1;
+
+        if (index < 0)
+            index = 0;
         if (dirMove.magnitude < 0.1f)
         {
             waitTimer += Time.deltaTime;
@@ -131,7 +150,7 @@ public class NPCPatrolTalkAI : MonoBehaviour
             }
             return;
         }
-
+       
         controller.Move(dirMove.normalized * moveSpeed * Time.deltaTime);
         Rotate(dirMove);
         if (animator != null)
@@ -271,7 +290,10 @@ public class NPCPatrolTalkAI : MonoBehaviour
     {
         player = null;
         lostSightTimer = 0f;
-        index = patrolReturnIndex;
+        if (waypoints != null && waypoints.Length > 0)
+        {
+            index = Mathf.Clamp(patrolReturnIndex, 0, waypoints.Length - 1);
+        }
         currentState = State.Patrol;
     }
 
