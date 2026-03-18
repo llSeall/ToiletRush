@@ -10,13 +10,18 @@ public class StartLevelUI : MonoBehaviour
     public Sprite startSprite;
 
     [Header("Countdown")]
-    public GameObject countdownObject;   // GameObject ของรูป 3 2 1
+    public GameObject countdownObject;
     public Image countdownImage;
-    public Sprite[] countdownSprites;    // ใส่ 3 รูป (3,2,1 ตามลำดับ)
+    public Sprite[] countdownSprites;
     public float countdownInterval = 1f;
 
     [Header("Input")]
     public KeyCode closeKey = KeyCode.Space;
+
+    [Header("Press Animation")]
+    public RectTransform pressButton;
+    public float pressAnimSpeed = 2f;
+    public float pressScale = 1.15f;
 
     private bool isShowingStart = false;
     private bool isCountingDown = false;
@@ -28,9 +33,19 @@ public class StartLevelUI : MonoBehaviour
 
     void Update()
     {
-        if (isShowingStart && Input.GetKeyDown(closeKey))
+        if (!isShowingStart) return;
+
+        // กด Spacebar
+        if (Input.GetKeyDown(closeKey))
         {
-            CloseStartUI();
+            StartGame();
+        }
+
+        // Animation ปุ่มเด้ง
+        if (pressButton != null)
+        {
+            float scale = 1 + Mathf.Sin(Time.unscaledTime * pressAnimSpeed) * (pressScale - 1);
+            pressButton.localScale = Vector3.one * scale;
         }
     }
 
@@ -43,12 +58,15 @@ public class StartLevelUI : MonoBehaviour
 
         countdownObject.SetActive(false);
 
-        Time.timeScale = 0f;   // หยุดเกม
+        Time.timeScale = 0f;
         isShowingStart = true;
     }
 
-    void CloseStartUI()
+    // ฟังก์ชันนี้ให้ UI Button เรียก
+    public void StartGame()
     {
+        if (!isShowingStart || isCountingDown) return;
+
         startPanel.SetActive(false);
         isShowingStart = false;
 
@@ -66,20 +84,18 @@ public class StartLevelUI : MonoBehaviour
             countdownImage.sprite = countdownSprites[i];
 
             yield return StartCoroutine(PopAnimation());
-
             yield return new WaitForSecondsRealtime(countdownInterval);
         }
 
         countdownObject.SetActive(false);
 
-        Time.timeScale = 1f;   //  เกมเริ่มจริง
+        Time.timeScale = 1f;
         isCountingDown = false;
     }
 
     IEnumerator PopAnimation()
     {
         RectTransform rect = countdownObject.GetComponent<RectTransform>();
-
         float duration = 0.25f;
         float timer = 0f;
 
@@ -87,7 +103,6 @@ public class StartLevelUI : MonoBehaviour
         Vector3 overshoot = Vector3.one * 1.3f;
         Vector3 normal = Vector3.one;
 
-        // ขยายเด้ง
         while (timer < duration)
         {
             timer += Time.unscaledDeltaTime;
@@ -95,8 +110,8 @@ public class StartLevelUI : MonoBehaviour
             yield return null;
         }
 
-        // กลับมาขนาดปกติ
         timer = 0f;
+
         while (timer < duration)
         {
             timer += Time.unscaledDeltaTime;

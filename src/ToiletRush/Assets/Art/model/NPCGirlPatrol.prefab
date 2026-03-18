@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1481461820387012920, guid: 92351e0b5e2145248920f8a43ee894a2, type: 3}
       propertyPath: m_Name
-      value: NPCGirl Variant
+      value: NPCGirlPatrol
       objectReference: {fileID: 0}
     - target: {fileID: 2049468304120655980, guid: 92351e0b5e2145248920f8a43ee894a2, type: 3}
       propertyPath: detectRadius
@@ -70,7 +70,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2049468304120655980, guid: 92351e0b5e2145248920f8a43ee894a2, type: 3}
-    m_RemovedGameObjects: []
+    - {fileID: 8583892488034180660, guid: 92351e0b5e2145248920f8a43ee894a2, type: 3}
+    m_RemovedGameObjects:
+    - {fileID: 5599192871548104588, guid: 92351e0b5e2145248920f8a43ee894a2, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 9093117729330248168, guid: 92351e0b5e2145248920f8a43ee894a2, type: 3}

@@ -25,14 +25,26 @@ public class GuardAI : MonoBehaviour
     [Range(0, 180)] public float viewAngle = 60f;
     public LayerMask obstacleMask;
 
+    [Header("Alert VFX")]
+    public GameObject alertVFXPrefab;
+
+    [Header("Shout VFX")]
+    public GameObject shoutWavePrefab;
+
+    private GameObject currentAlertVFX;
+    private GameObject currentShoutWave;
+
     [Header("UI")]
     public GameObject gameOverCanvas;
+
     public Renderer visionRenderer;
     public Color normalColor = Color.yellow;
     public Color alertColor = Color.red;
+
     [Header("Game Over Image")]
     public UnityEngine.UI.Image gameOverImage;
     public Sprite gameOverSprite;
+
     [Header("Idle")]
     public float idleDuration = 1.2f;
 
@@ -42,7 +54,6 @@ public class GuardAI : MonoBehaviour
     private CharacterController controller;
     private Transform player;
     private Animator animator;
-
 
     private int currentIndex = 0;
     private int direction = 1;
@@ -57,7 +68,6 @@ public class GuardAI : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
-
         controller = GetComponent<CharacterController>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
@@ -115,11 +125,9 @@ public class GuardAI : MonoBehaviour
 
         if (Vector3.Distance(flatPos, flatTarget) < 0.4f)
         {
-            StartIdle(); //  หยุดยืนก่อน
+            StartIdle();
         }
     }
-
-
 
     void NextPoint()
     {
@@ -153,27 +161,25 @@ public class GuardAI : MonoBehaviour
 
         RaycastHit hit;
 
-        // ยิง Raycast ตรวจว่าโดนอะไรเป็นอันดับแรก
-        if (Physics.Raycast(
-            origin,
-            dirToPlayer,
-            out hit,
-            distance,
-            ~0, // ชนทุก Layer
-            QueryTriggerInteraction.Ignore
-        ))
+        if (Physics.Raycast(origin, dirToPlayer, out hit, distance))
         {
             if (hit.transform.CompareTag("Player"))
             {
-                patrolReturnIndex = currentIndex;
-                lastSeenPosition = player.position;
+                if (currentState != State.Chase)
+                {
+                    patrolReturnIndex = currentIndex;
+                    lastSeenPosition = player.position;
 
-                currentState = State.Chase;
-                UpdateVisionColor(alertColor);
+                    currentState = State.Chase;
+                    UpdateVisionColor(alertColor);
+
+                    ShowAlertVFX();
+                    SpawnShoutWave();
+                }
             }
-            // ถ้าโดนอย่างอื่นก่อน (เช่น กำแพง)  ไม่ทำอะไร
         }
     }
+
     void OnTriggerEnter(Collider other)
     {
         if (currentState != State.Chase) return;
@@ -189,6 +195,8 @@ public class GuardAI : MonoBehaviour
     {
         isIdling = false;
 
+        UpdateShoutWavePosition();
+
         float distance = Vector3.Distance(transform.position, player.position);
 
         if (distance <= catchDistance)
@@ -203,15 +211,17 @@ public class GuardAI : MonoBehaviour
 
         if (distance > viewDistance)
         {
-            // หลุดสายตา เริ่มค้นหา
             searchTimer = 0f;
             PickNewSearchPoint();
 
             currentState = State.Search;
             UpdateVisionColor(normalColor);
-        }
-        UpdateAnimation(chaseSpeed);
 
+            HideAlertVFX();
+            RemoveShoutWave();
+        }
+        UpdateShoutWavePosition();
+        UpdateAnimation(chaseSpeed);
     }
 
     // ---------- SEARCH ----------
@@ -239,7 +249,7 @@ public class GuardAI : MonoBehaviour
 
         if (Vector3.Distance(transform.position, searchTarget) < 0.3f)
         {
-            StartIdle(); // หยุดมองรอบ ๆ
+            StartIdle();
         }
 
         if (searchTimer >= searchDuration)
@@ -248,7 +258,6 @@ public class GuardAI : MonoBehaviour
             currentState = State.Return;
         }
     }
-
 
     void PickNewSearchPoint()
     {
@@ -269,12 +278,11 @@ public class GuardAI : MonoBehaviour
         if (Vector3.Distance(flatPos, flatTarget) < 0.4f)
         {
             StartIdle();
-
             currentIndex = patrolReturnIndex;
             currentState = State.Patrol;
         }
-        UpdateAnimation(patrolSpeed);
 
+        UpdateAnimation(patrolSpeed);
     }
 
     // ---------- COMMON ----------
@@ -293,14 +301,17 @@ public class GuardAI : MonoBehaviour
             Time.deltaTime * 5f
         );
     }
+
     void CatchPlayer()
     {
+        HideAlertVFX();
+        RemoveShoutWave();
+
         Debug.Log("PLAYER CAUGHT!");
 
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
 
-        // ตั้งค่าภาพเหตุผล Game Over
         if (gameOverImage != null && gameOverSprite != null)
             gameOverImage.sprite = gameOverSprite;
 
@@ -314,41 +325,86 @@ public class GuardAI : MonoBehaviour
             visionRenderer.material.color = c;
     }
 
+    void UpdateAnimation(float speed)
+    {
+        if (animator == null) return;
+        animator.SetFloat("Speed", speed);
+    }
+
+    void StartIdle()
+    {
+        isIdling = true;
+        idleTimer = 0f;
+        UpdateAnimation(0f);
+    }
+
+    // ---------- ALERT VFX ----------
+    void ShowAlertVFX()
+    {
+        if (alertVFXPrefab == null || currentAlertVFX != null) return;
+
+        Vector3 pos = transform.position + Vector3.up * 2f;
+
+        currentAlertVFX = Instantiate(alertVFXPrefab, pos, Quaternion.identity);
+        currentAlertVFX.transform.SetParent(transform);
+    }
+
+    void HideAlertVFX()
+    {
+        if (currentAlertVFX != null)
+        {
+            Destroy(currentAlertVFX);
+            currentAlertVFX = null;
+        }
+    }
+
+    // ---------- SHOUT WAVE ----------
+    void SpawnShoutWave()
+    {
+        if (shoutWavePrefab == null || currentShoutWave != null) return;
+
+        currentShoutWave = Instantiate(shoutWavePrefab);
+
+        currentShoutWave.transform.parent = null; // สำคัญ
+    }
+    void UpdateShoutWavePosition()
+    {
+        if (currentShoutWave == null) return;
+        if (player == null) return;
+
+        Vector3 npcPos = transform.position;
+        Vector3 playerPos = player.position;
+
+        Vector3 midPoint = Vector3.Lerp(npcPos, playerPos, 0.5f);
+
+        midPoint.y = npcPos.y + 1.5f;
+
+        currentShoutWave.transform.position = midPoint;
+    }
+
+    void RemoveShoutWave()
+    {
+        if (currentShoutWave != null)
+        {
+            Destroy(currentShoutWave);
+            currentShoutWave = null;
+        }
+    }
+
     // ---------- DEBUG ----------
     void OnDrawGizmosSelected()
     {
-        // วาดระยะมองเห็น
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, viewDistance);
 
-        // วาดมุมมอง (FOV)
-        Vector3 leftBoundary = Quaternion.Euler(0, -viewAngle / 2f, 0) * transform.forward;
-        Vector3 rightBoundary = Quaternion.Euler(0, viewAngle / 2f, 0) * transform.forward;
+        Vector3 left = Quaternion.Euler(0, -viewAngle / 2f, 0) * transform.forward;
+        Vector3 right = Quaternion.Euler(0, viewAngle / 2f, 0) * transform.forward;
 
         Gizmos.color = Color.green;
-        Gizmos.DrawLine(transform.position, transform.position + leftBoundary * viewDistance);
-        Gizmos.DrawLine(transform.position, transform.position + rightBoundary * viewDistance);
-
-        // วาดเส้นไปหาผู้เล่น (ถ้ามี)
-        if (player != null)
-        {
-            Vector3 dirToPlayer = (player.position - transform.position).normalized;
-            float angle = Vector3.Angle(transform.forward, dirToPlayer);
-
-            if (angle < viewAngle / 2f)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawLine(transform.position, player.position);
-            }
-        }
-
-        // Search area
-        if (currentState == State.Search)
-        {
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(lastSeenPosition, searchRadius);
-        }
+        Gizmos.DrawLine(transform.position, transform.position + left * viewDistance);
+        Gizmos.DrawLine(transform.position, transform.position + right * viewDistance);
     }
+
     public void Investigate(Vector3 alertPosition)
     {
         lastSeenPosition = alertPosition;
@@ -357,17 +413,4 @@ public class GuardAI : MonoBehaviour
         currentState = State.Search;
         UpdateVisionColor(alertColor);
     }
-    void UpdateAnimation(float speed)
-    {
-        if (animator == null) return;
-        animator.SetFloat("Speed", speed);
-    }
-    void StartIdle()
-    {
-        isIdling = true;
-        idleTimer = 0f;
-        UpdateAnimation(0f); // Idle animation
-    }
-
-
 }

@@ -12,10 +12,15 @@ public class QuestGPSSystem : MonoBehaviour
         public Transform target;
         public QuestType questType;
         public Sprite questIcon;
-
+        [Header("Quest Chain")]
+        public Quest unlockAfterQuest;
+        [HideInInspector] public bool isCompleted;
+        public bool startLocked;
         [HideInInspector] public RectTransform markerUI;
         [HideInInspector] public TextMeshProUGUI distanceText;
         [HideInInspector] public Vector3 smoothPos;
+        [Header("Quest Order")]
+        public int questOrder = 0;
     }
 
     public enum QuestType
@@ -23,7 +28,7 @@ public class QuestGPSSystem : MonoBehaviour
         DisappearWhenReached,
         Permanent
     }
-
+ 
     [Header("Player")]
     public Transform player;
 
@@ -62,7 +67,7 @@ public class QuestGPSSystem : MonoBehaviour
     void Start()
     {
         cam = Camera.main;
-
+        quests.Sort((a, b) => a.questOrder.CompareTo(b.questOrder));
         if (player == null)
         {
             GameObject p = GameObject.FindGameObjectWithTag("Player");
@@ -102,7 +107,10 @@ public class QuestGPSSystem : MonoBehaviour
         {
             icon.sprite = quest.questIcon != null ? quest.questIcon : defaultIcon;
         }
-
+        if (quest.startLocked)
+        {
+            marker.SetActive(false);
+        }
         quest.smoothPos = quest.markerUI.position;
     }
 
@@ -155,10 +163,37 @@ public class QuestGPSSystem : MonoBehaviour
 
         if (quest.questType == QuestType.DisappearWhenReached && distance < minDistance)
         {
-            quest.markerUI.gameObject.SetActive(false);
+            CompleteQuest(quest);
         }
     }
+    void CompleteQuest(Quest quest)
+    {
+        quest.isCompleted = true;
 
+        if (quest.markerUI != null)
+            quest.markerUI.gameObject.SetActive(false);
+
+        int nextOrder = quest.questOrder + 1;
+
+        foreach (var q in quests)
+        {
+            if (q.questOrder == nextOrder && q.markerUI != null)
+            {
+                q.markerUI.gameObject.SetActive(true);
+            }
+        }
+    }
+    void UnlockNextQuests(Quest completedQuest)
+    {
+        foreach (var q in quests)
+        {
+            if (q.unlockAfterQuest == completedQuest)
+            {
+                if (q.markerUI != null)
+                    q.markerUI.gameObject.SetActive(true);
+            }
+        }
+    }
     void PreventMarkerOverlap()
     {
         for (int i = 0; i < quests.Count; i++)

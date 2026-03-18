@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System;
 using System.Collections;
 
 public class SecurityCameraAI : MonoBehaviour
@@ -13,7 +12,7 @@ public class SecurityCameraAI : MonoBehaviour
     private Quaternion baseRotation;
 
     [Header("Disable")]
-    public GameObject visionObject; // วัตถุแสง/กรวยที่แสดงระยะมองเห็น
+    public GameObject visionObject;
 
     [Header("Vision")]
     public float viewDistance = 8f;
@@ -25,9 +24,14 @@ public class SecurityCameraAI : MonoBehaviour
     public Renderer visionRenderer;
     public Color normalColor = Color.green;
     public Color alertColor = Color.red;
+
     [Header("UI Alert Flash")]
     public GameObject alertImageUI;
     public float alertImageDuration = 0.8f;
+
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip alertSound;
 
     private Coroutine alertUIRoutine;
 
@@ -43,13 +47,15 @@ public class SecurityCameraAI : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player").transform;
         currentAngle = -rotateAngle;
 
-        //  เก็บ rotation ตั้งต้น
         if (rotator != null)
             baseRotation = rotator.localRotation;
 
         UpdateVisionColor(normalColor);
-    }
 
+        // กันลืมใส่ AudioSource
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
+    }
 
     void Update()
     {
@@ -74,7 +80,6 @@ public class SecurityCameraAI : MonoBehaviour
         }
     }
 
-
     // ---------- VISION ----------
     void CheckVision()
     {
@@ -90,45 +95,38 @@ public class SecurityCameraAI : MonoBehaviour
         if (distance > viewDistance)
             return;
 
-        // ใช้ทิศของ rotator จริง
         float angle = Vector3.Angle(rotator.forward, dirToPlayer);
         if (angle > viewAngle * 0.5f)
             return;
 
         RaycastHit hit;
 
-        //  ยิง Raycast แบบดูว่าโดนอะไรเป็นอันดับแรก
         if (Physics.Raycast(
             origin,
             dirToPlayer,
             out hit,
             distance,
-            ~0, // ชนทุก Layer
+            ~0,
             QueryTriggerInteraction.Ignore
         ))
         {
-            //  เห็นผู้เล่นจริง
             if (hit.transform.CompareTag("Player"))
             {
                 AlertNearestGuard();
             }
-            //  ชนอย่างอื่นก่อน (เช่น กำแพง)
-            else
-            {
-                return;
-            }
         }
     }
-
-
 
     // ---------- ALERT ----------
     void AlertNearestGuard()
     {
-
         canAlert = false;
+
         UpdateVisionColor(alertColor);
         ShowAlertUI();
+
+        //  เล่นเสียงตอนจับได้
+        PlayAlertSound();
 
         GuardAI[] guards = FindObjectsOfType<GuardAI>();
         GuardAI nearest = null;
@@ -149,6 +147,16 @@ public class SecurityCameraAI : MonoBehaviour
 
         Invoke(nameof(ResetAlert), alertCooldown);
     }
+
+    void PlayAlertSound()
+    {
+        if (audioSource == null || alertSound == null)
+            return;
+
+        audioSource.Stop(); // กันเสียงซ้อน
+        audioSource.PlayOneShot(alertSound);
+    }
+
     void ShowAlertUI()
     {
         if (alertImageUI == null)
@@ -180,13 +188,26 @@ public class SecurityCameraAI : MonoBehaviour
         UpdateVisionColor(Color.gray);
     }
 
+    public void DisableCameraFully()
+    {
+        isDisabled = true;
+        canAlert = false;
+
+        enabled = false;
+
+        if (visionObject != null)
+            visionObject.SetActive(false);
+
+        UpdateVisionColor(Color.gray);
+    }
+
     void UpdateVisionColor(Color c)
     {
         if (visionRenderer != null)
             visionRenderer.material.color = c;
     }
 
-    // ---------- DEBUG (FOV) ----------
+    // ---------- DEBUG ----------
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
@@ -196,34 +217,5 @@ public class SecurityCameraAI : MonoBehaviour
 
         Gizmos.DrawRay(transform.position, left * viewDistance);
         Gizmos.DrawRay(transform.position, right * viewDistance);
-
-        int segments = 20;
-        Vector3 prevPoint = transform.position + left * viewDistance;
-
-        for (int i = 1; i <= segments; i++)
-        {
-            float angle = -viewAngle / 2f + (viewAngle / segments) * i;
-            Vector3 dir = Quaternion.Euler(0, angle, 0) * transform.forward;
-            Vector3 nextPoint = transform.position + dir * viewDistance;
-
-            Gizmos.DrawLine(prevPoint, nextPoint);
-            prevPoint = nextPoint;
-        }
     }
-    public void DisableCameraFully()
-    {
-        isDisabled = true;
-        canAlert = false;
-
-        // หยุดหมุน
-        enabled = false;
-
-        // ปิดแสงแสดงระยะมองเห็น
-        if (visionObject != null)
-            visionObject.SetActive(false);
-
-        // เปลี่ยนสี (ถ้ายังใช้ Renderer)
-        UpdateVisionColor(Color.gray);
-    }
-
 }
