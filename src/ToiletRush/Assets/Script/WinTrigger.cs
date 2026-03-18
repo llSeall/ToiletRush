@@ -8,6 +8,7 @@ public class WinTrigger : MonoBehaviour
         NoQuestRequired,
         RequireQuest
     }
+
     [Header("Incomplete Quest Dialogue")]
     public DialogueSystem dialogueSystem;
     [TextArea(3, 5)]
@@ -23,6 +24,10 @@ public class WinTrigger : MonoBehaviour
     public StarUI starUI;
     public string levelName;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip winSound;
+
     private bool alreadyWon = false;
 
     private void Start()
@@ -31,6 +36,10 @@ public class WinTrigger : MonoBehaviour
         {
             quest.OnQuestCompleted += OnQuestCompleted;
         }
+
+        // กันลืมใส่ AudioSource
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
     }
 
     private void OnDestroy()
@@ -44,8 +53,8 @@ public class WinTrigger : MonoBehaviour
     private void OnQuestCompleted()
     {
         Debug.Log("Quest completed, WinTrigger unlocked");
-
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
@@ -67,6 +76,7 @@ public class WinTrigger : MonoBehaviour
             }
         }
     }
+
     void ShowIncompleteQuestDialogue()
     {
         if (dialogueSystem == null) return;
@@ -74,9 +84,13 @@ public class WinTrigger : MonoBehaviour
         List<string> lines = new List<string>(incompleteQuestLines);
         dialogueSystem.StartDialogue(lines, portrait);
     }
+
     void WinGame()
     {
         alreadyWon = true;
+
+        //  เล่นเสียงตอน "ชนะเท่านั้น"
+        PlayWinSound();
 
         int stars = LevelResultManager.Instance.CalculateStars();
 
@@ -87,5 +101,14 @@ public class WinTrigger : MonoBehaviour
         starUI.ShowStars(stars);
 
         Time.timeScale = 0f;
+    }
+
+    void PlayWinSound()
+    {
+        if (audioSource == null || winSound == null)
+            return;
+
+        audioSource.Stop(); // กันเสียงซ้อน
+        audioSource.PlayOneShot(winSound);
     }
 }

@@ -423,6 +423,7 @@ MonoBehaviour:
   leftSprite: {fileID: 21300000, guid: daae0fadd2ae04646a2dea168adcadd8, type: 3}
   rightSprite: {fileID: 21300000, guid: 6671a5db5546d424496852208743d170, type: 3}
   playerMovementScript: {fileID: 48189790}
+  qteLength: 5
 --- !u!1 &40621426
 GameObject:
   m_ObjectHideFlags: 0
@@ -7921,6 +7922,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pausePanel: {fileID: 1545554701}
+  volume: {fileID: 0}
   escImagePanel: {fileID: 1185302383}
   escImage: {fileID: 1185302385}
   levelEscSprite: {fileID: 0}
@@ -7965,6 +7967,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: adb084a39d61b4145a95105476b3ab01, type: 3}
   countdownInterval: 1
   closeKey: 32
+  pressButton: {fileID: 0}
+  pressAnimSpeed: 2
+  pressScale: 1.15
 --- !u!4 &1297329860 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 17d0c04698781d040822b754dad8ca17, type: 3}
@@ -10247,7 +10252,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1545554702
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12244,16 +12249,22 @@ MonoBehaviour:
     target: {fileID: 763065264}
     questType: 1
     questIcon: {fileID: 21300000, guid: 1e02327778283df4488b01e5beccb6d4, type: 3}
+    isCompleted: 0
+    startLocked: 0
     markerUI: {fileID: 0}
     distanceText: {fileID: 0}
     smoothPos: {x: 0, y: 0, z: 0}
+    questOrder: 0
   - questName: Door
     target: {fileID: 2594492}
     questType: 0
     questIcon: {fileID: 21300000, guid: 94c7499f73656204c8360229c6314e92, type: 3}
+    isCompleted: 0
+    startLocked: 0
     markerUI: {fileID: 0}
     distanceText: {fileID: 0}
     smoothPos: {x: 0, y: 0, z: 0}
+    questOrder: 0
   markerPrefab: {fileID: 7874400485525268734, guid: 240cd55c0ca4fd74ebb210c4b4cd1ad5, type: 3}
   markerParent: {fileID: 17885437}
   defaultIcon: {fileID: 0}
@@ -13325,7 +13336,7 @@ PrefabInstance:
       objectReference: {fileID: 1614708524}
     - target: {fileID: 207571055324509618, guid: b03d20b0d325aba498f20fbeabfeb256, type: 3}
       propertyPath: alertImageDuration
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3893722089092263629, guid: b03d20b0d325aba498f20fbeabfeb256, type: 3}
       propertyPath: m_LocalPosition.x
@@ -14461,6 +14472,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1205939593}
     m_Modifications:
+    - target: {fileID: 137357870764740173, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
+      propertyPath: MaxDistance
+      value: 5.617217
+      objectReference: {fileID: 0}
+    - target: {fileID: 137357870764740173, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
+      propertyPath: MinDistance
+      value: 3.3091488
+      objectReference: {fileID: 0}
     - target: {fileID: 3730412253072869360, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
       propertyPath: quest
       value: 
@@ -14479,7 +14498,7 @@ PrefabInstance:
       objectReference: {fileID: 584284782}
     - target: {fileID: 3730412253072869360, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
       propertyPath: winCondition
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3730412253072869360, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
       propertyPath: dialogueSystem

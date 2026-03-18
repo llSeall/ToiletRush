@@ -14,18 +14,17 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
     [Header("Patrol")]
     public Transform[] waypoints;
-    public bool standStillIfNoWaypoint = true;
     public float moveSpeed = 2f;
     public float waitTimeAtPoint = 0.5f;
+
     [Header("Detect (AI Zone)")]
     public float detectRadius = 5f;
     public float talkDistance = 1.5f;
     public LayerMask playerLayer;
-    public LayerMask obstacleMask;
 
     [Header("Chase")]
     public float chaseSpeed = 4f;
-    public float lostSightDelay = 0.6f; // หลบหลังสิ่งกีดขวางได้ชั่วคราว
+    public float lostSightDelay = 0.6f;
 
     [Header("Player Control")]
     public MonoBehaviour playerMovement;
@@ -36,6 +35,13 @@ public class NPCPatrolTalkAI : MonoBehaviour
     [Header("QTE")]
     public TalkQTEUI qteUI;
 
+    //  VOICE
+    [Header("Voice")]
+    public AudioSource audioSource;
+    public AudioClip maleVoice;
+    public AudioClip femaleVoice;
+    public bool isMale = true;
+
     private CharacterController controller;
     private Transform player;
 
@@ -44,26 +50,25 @@ public class NPCPatrolTalkAI : MonoBehaviour
     private float waitTimer;
     private float stunTimer;
     private float lostSightTimer;
-
     private int patrolReturnIndex;
 
-    // ================= START =================
     void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+
         if (waypoints != null && waypoints.Length > 0)
-        {
             transform.position = waypoints[0].position;
-        }
     }
 
-
-    // ================= UPDATE =================
     void Update()
     {
         if (currentState == State.Patrol)
             DetectPlayer();
+
+        //  กันเสียงค้าง
+        if (currentState != State.Talk && audioSource != null && audioSource.isPlaying)
+            StopVoice();
 
         if (currentState != previousState)
         {
@@ -80,16 +85,10 @@ public class NPCPatrolTalkAI : MonoBehaviour
         }
     }
 
-
     // ================= DETECT =================
     void DetectPlayer()
     {
-        Collider[] hits = Physics.OverlapSphere(
-            transform.position,
-            detectRadius,
-            playerLayer
-        );
-
+        Collider[] hits = Physics.OverlapSphere(transform.position, detectRadius, playerLayer);
         if (hits.Length == 0) return;
 
         Transform target = hits[0].transform;
@@ -97,10 +96,9 @@ public class NPCPatrolTalkAI : MonoBehaviour
         Vector3 origin = transform.position + Vector3.up * 0.8f;
         Vector3 targetPos = target.position + Vector3.up * 0.8f;
         Vector3 dir = targetPos - origin;
-        float distance = dir.magnitude;
 
         RaycastHit hit;
-        if (Physics.Raycast(origin, dir.normalized, out hit, distance, ~0))
+        if (Physics.Raycast(origin, dir.normalized, out hit, dir.magnitude))
         {
             if (hit.transform.CompareTag("Player"))
             {
@@ -115,26 +113,17 @@ public class NPCPatrolTalkAI : MonoBehaviour
     // ================= PATROL =================
     void Patrol()
     {
-        Vector3 target = waypoints[index].position;
-        Vector3 dirMove = target - transform.position;
-        dirMove.y = 0;
-        // ===== ไม่มี waypoint = ยืนนิ่ง =====
         if (waypoints == null || waypoints.Length <= 1)
         {
             if (animator != null)
-            {
-                animator.SetBool("IsTalking", false);
                 animator.SetFloat("Speed", 0f);
-            }
             return;
         }
 
-        // ===== ป้องกัน index หลุด =====
-        if (index >= waypoints.Length)
-            index = waypoints.Length - 1;
+        Vector3 target = waypoints[index].position;
+        Vector3 dirMove = target - transform.position;
+        dirMove.y = 0;
 
-        if (index < 0)
-            index = 0;
         if (dirMove.magnitude < 0.1f)
         {
             waitTimer += Time.deltaTime;
@@ -150,38 +139,25 @@ public class NPCPatrolTalkAI : MonoBehaviour
             }
             return;
         }
-       
+
         controller.Move(dirMove.normalized * moveSpeed * Time.deltaTime);
         Rotate(dirMove);
-        if (animator != null)
-        {
-            animator.SetBool("IsTalking", false);
-            animator.SetFloat("Speed", dirMove.magnitude > 0.1f ? 1f : 0f);
-        }
 
+        if (animator != null)
+            animator.SetFloat("Speed", 1f);
     }
 
     // ================= CHASE =================
     void Chase()
     {
-        if (animator != null)
-        {
-            animator.SetBool("IsTalking", false);
-            animator.SetFloat("Speed", 1f);
-        }
-
         if (player == null)
         {
             ResetToPatrol();
             return;
         }
 
-        float distanceToPlayer = Vector3.Distance(
-            transform.position,
-            player.position
-        );
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        //  หลุดโซน AI
         if (distanceToPlayer > detectRadius)
         {
             ResetToPatrol();
@@ -192,9 +168,8 @@ public class NPCPatrolTalkAI : MonoBehaviour
         Vector3 targetPos = player.position + Vector3.up * 0.8f;
         Vector3 dir = targetPos - origin;
 
-        //  เช็คกำแพงบัง
         RaycastHit hit;
-        if (Physics.Raycast(origin, dir.normalized, out hit, dir.magnitude, ~0))
+        if (Physics.Raycast(origin, dir.normalized, out hit, dir.magnitude))
         {
             if (!hit.transform.CompareTag("Player"))
             {
@@ -211,56 +186,47 @@ public class NPCPatrolTalkAI : MonoBehaviour
             }
         }
 
-        // เข้า Talk
         if (distanceToPlayer <= talkDistance)
         {
             StartTalk();
             return;
         }
 
-        //  ไล่
         dir.y = 0;
         controller.Move(dir.normalized * chaseSpeed * Time.deltaTime);
         Rotate(dir);
+
+        if (animator != null)
+            animator.SetFloat("Speed", 1f);
     }
 
     // ================= TALK =================
     void StartTalk()
     {
-        Debug.Log("StartTalk called");
-
         currentState = State.Talk;
 
-        // ให้ผู้เล่นหันมาหา NPC
-        Vector3 lookDir = transform.position - player.transform.position;
+        Vector3 lookDir = transform.position - player.position;
         lookDir.y = 0;
-        player.transform.rotation = Quaternion.LookRotation(lookDir);
+        player.rotation = Quaternion.LookRotation(lookDir);
 
         if (playerMovement != null)
             playerMovement.enabled = false;
 
-        // ===== PLAYER ANIMATION =====
         if (playerAnimator != null)
-        {
-            playerAnimator.SetFloat("Speed", 0f);
-            playerAnimator.SetBool("IsRunning", false);
             playerAnimator.SetBool("IsTalking", true);
-        }
 
-        // ===== NPC ANIMATION =====
         if (animator != null)
-        {
-            animator.SetFloat("Speed", 0f);
-            animator.SetBool("IsTalking", true);   //  ตัวสำคัญ
-        }
+            animator.SetBool("IsTalking", true);
+
+        PlayVoice();
 
         qteUI.StartQTE(this);
     }
 
-
-
     public void OnQTESuccess()
     {
+        StopVoice();
+
         currentState = State.Stun;
         stunTimer = stunTime;
 
@@ -268,32 +234,25 @@ public class NPCPatrolTalkAI : MonoBehaviour
             playerMovement.enabled = true;
 
         if (playerAnimator != null)
-            playerAnimator.SetBool("IsTalking", false); //  ปิดท่าคุย
+            playerAnimator.SetBool("IsTalking", false);
 
         if (animator != null)
             animator.SetBool("IsTalking", false);
     }
 
-
-    // ================= STUN =================
     void Stun()
     {
         stunTimer -= Time.deltaTime;
         if (stunTimer <= 0f)
-        {
             ResetToPatrol();
-        }
     }
 
-    // ================= RESET =================
     void ResetToPatrol()
     {
+        StopVoice();
+
         player = null;
         lostSightTimer = 0f;
-        if (waypoints != null && waypoints.Length > 0)
-        {
-            index = Mathf.Clamp(patrolReturnIndex, 0, waypoints.Length - 1);
-        }
         currentState = State.Patrol;
     }
 
@@ -308,6 +267,7 @@ public class NPCPatrolTalkAI : MonoBehaviour
             Time.deltaTime * 5f
         );
     }
+
     void UpdateAnimationByState()
     {
         if (animator == null) return;
@@ -315,10 +275,6 @@ public class NPCPatrolTalkAI : MonoBehaviour
         switch (currentState)
         {
             case State.Patrol:
-                animator.SetBool("IsTalking", false);
-                animator.SetFloat("Speed", 1f);
-                break;
-
             case State.Chase:
                 animator.SetBool("IsTalking", false);
                 animator.SetFloat("Speed", 1f);
@@ -336,11 +292,24 @@ public class NPCPatrolTalkAI : MonoBehaviour
         }
     }
 
-#if UNITY_EDITOR
-    void OnDrawGizmosSelected()
+    // ================= VOICE =================
+    void PlayVoice()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectRadius);
+        if (audioSource == null) return;
+
+        AudioClip clip = isMale ? maleVoice : femaleVoice;
+
+        if (clip != null)
+        {
+            audioSource.clip = clip;
+            audioSource.loop = true;
+            audioSource.Play();
+        }
     }
-#endif
+
+    void StopVoice()
+    {
+        if (audioSource == null) return;
+        audioSource.Stop();
+    }
 }
