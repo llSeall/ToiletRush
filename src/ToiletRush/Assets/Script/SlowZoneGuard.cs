@@ -3,7 +3,10 @@ using UnityEngine;
 public class NPCSlowZone : MonoBehaviour
 {
     [Range(0.1f, 1f)]
-    public float slowAmount = 0.4f; // 40% ของความเร็วปกติ
+    public float slowAmount = 0.4f;
+
+    [Header("Zone Music")]
+    public AudioClip zoneMusic;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -12,6 +15,9 @@ public class NPCSlowZone : MonoBehaviour
         if (player != null)
         {
             player.SetSlowZone(true);
+
+            //  เข้าโซน  เล่นเพลง
+            ZoneAudioController.Instance.EnterZone(zoneMusic);
         }
     }
 
@@ -22,6 +28,9 @@ public class NPCSlowZone : MonoBehaviour
         if (player != null)
         {
             player.SetSlowZone(false);
+
+            // ออกจากโซน คืนเสียงปกติ
+            ZoneAudioController.Instance.ExitZone();
         }
     }
 }
