@@ -23,6 +23,7 @@ public class QuestTrigger : MonoBehaviour
         {
             quest.OnQuestCompleted += OnQuestCompleted;
         }
+
         GetComponent<Collider>().isTrigger = true;
     }
 
@@ -33,6 +34,7 @@ public class QuestTrigger : MonoBehaviour
             quest.OnQuestCompleted -= OnQuestCompleted;
         }
     }
+
     private void OnQuestCompleted()
     {
         if (triggerType == TriggerType.Deliver ||
@@ -58,6 +60,7 @@ public class QuestTrigger : MonoBehaviour
                 if (quest is DeliveryQuest deliveryQuest2)
                 {
                     deliveryQuest2.DeliverItem();
+
                     if (useImageEffect && imgEffect != null)
                         imgEffect.PlayEffect();
                 }
@@ -71,12 +74,19 @@ public class QuestTrigger : MonoBehaviour
             case TriggerType.MiniGameDeliver:
                 if (quest is MiniGameQuest miniGameQuest2)
                 {
+                    //  กันกดก่อนมินิเกมจบ
+                    if (!miniGameQuest2.miniGameCompleted)
+                    {
+                        Debug.Log("MiniGame not finished!");
+                        return;
+                    }
+
                     miniGameQuest2.DeliverAfterMiniGame();
+
                     if (useImageEffect && imgEffect != null)
                         imgEffect.PlayEffect();
                 }
                 break;
-
         }
     }
 }

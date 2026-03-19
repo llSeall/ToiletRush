@@ -2278,6 +2278,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 424910468}
   m_CullTransparentMesh: 1
+--- !u!114 &492732416 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4069545105579829475, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
+  m_PrefabInstance: {fileID: 8683743044259584129}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fcaedbd9bdcc96449826cacd02c0728, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &568380306
 GameObject:
   m_ObjectHideFlags: 0
@@ -14498,7 +14509,7 @@ PrefabInstance:
       objectReference: {fileID: 584284782}
     - target: {fileID: 3730412253072869360, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
       propertyPath: winCondition
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3730412253072869360, guid: 7bc3b756420cd1a42b6bef5f8dce4443, type: 3}
       propertyPath: dialogueSystem
@@ -15117,6 +15128,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 208776072280806268, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 582728560520930168, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
       propertyPath: scareImage
       value: 
@@ -15193,6 +15208,10 @@ PrefabInstance:
       propertyPath: playerAnimator
       value: 
       objectReference: {fileID: 48189786}
+    - target: {fileID: 6858291489200633089, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
+      propertyPath: miniGameDeliverTrigger
+      value: 
+      objectReference: {fileID: 492732416}
     - target: {fileID: 8398290685952436651, guid: 362f131a366c8bf4082a7e39f0c25ec6, type: 3}
       propertyPath: quest
       value: 
