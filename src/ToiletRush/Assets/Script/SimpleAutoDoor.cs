@@ -1,11 +1,12 @@
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class SimpleSwingDoor : MonoBehaviour
 {
     public enum DoorMode
     {
-        OpenOnTrigger,   // ชนแล้วเปิดเลย
-        RequireQTE       // ต้องเรียก OpenDoor() เอง
+        OpenOnTrigger,
+        RequireQTE
     }
 
     [Header("Door Mode")]
@@ -19,6 +20,10 @@ public class SimpleSwingDoor : MonoBehaviour
     [Header("Collider")]
     public Collider blockCollider;
 
+    [Header("Sound")]
+    public AudioClip openSound;   // เสียงเปิดประตู
+    private AudioSource audioSource;
+
     private bool isOpening = false;
     private bool isOpen = false;
 
@@ -27,6 +32,8 @@ public class SimpleSwingDoor : MonoBehaviour
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+
         closedRot = transform.rotation;
 
         float angle = openToRight ? openAngle : -openAngle;
@@ -67,17 +74,23 @@ public class SimpleSwingDoor : MonoBehaviour
 
         if (other.CompareTag("Player"))
         {
-            isOpening = true;
-            Debug.Log("Door opening (Normal Mode)");
+            OpenDoor();
         }
     }
 
-    //  เรียกจาก QTE เท่านั้น
+    // ใช้ทั้ง QTE และ Trigger
     public void OpenDoor()
     {
         if (isOpen || isOpening) return;
 
         isOpening = true;
-        Debug.Log("Door opening (QTE Mode)");
+
+        //  เล่นเสียง
+        if (openSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(openSound);
+        }
+
+        Debug.Log("Door opening");
     }
 }

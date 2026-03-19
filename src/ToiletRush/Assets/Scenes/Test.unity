@@ -1080,6 +1080,11 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!82 &109948881 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 6408349488700925154, guid: a9915bb4076074a4380da1c45a1d6b6b, type: 3}
+  m_PrefabInstance: {fileID: 2845635773017373504}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &115884714 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5143465661181938399, guid: 73fcc5767f737f345af0421d5b604a6e, type: 3}
@@ -8446,6 +8451,8 @@ GameObject:
   - component: {fileID: 1353142059}
   - component: {fileID: 1353142058}
   - component: {fileID: 1353142057}
+  - component: {fileID: 1353142061}
+  - component: {fileID: 1353142060}
   m_Layer: 5
   m_Name: PlayerImg
   m_TagString: Untagged
@@ -8532,6 +8539,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1353142055}
   m_CullTransparentMesh: 1
+--- !u!114 &1353142060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1353142055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455dabacc8f14e04d90b01e0e4864b32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitShakeDuration: 0.25
+  hitShakeStrength: 12
+  lowShakeStrength: 3
+  lowShakeSpeed: 25
+--- !u!114 &1353142061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1353142055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 448a3d11f9c8cd24e92d7386568c3352, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 1353142056}
+  duration: 0.2
+  strength: 8
 --- !u!1 &1360927532
 GameObject:
   m_ObjectHideFlags: 0
@@ -13479,6 +13517,18 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1064989316}
     - target: {fileID: 5789926821779518549, guid: a9915bb4076074a4380da1c45a1d6b6b, type: 3}
+      propertyPath: openDelay
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5789926821779518549, guid: a9915bb4076074a4380da1c45a1d6b6b, type: 3}
+      propertyPath: stuckClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 12029f3f7fc0d444dafd9c51d11e8718, type: 3}
+    - target: {fileID: 5789926821779518549, guid: a9915bb4076074a4380da1c45a1d6b6b, type: 3}
+      propertyPath: audioSource
+      value: 
+      objectReference: {fileID: 109948881}
+    - target: {fileID: 5789926821779518549, guid: a9915bb4076074a4380da1c45a1d6b6b, type: 3}
       propertyPath: playerAnimator
       value: 
       objectReference: {fileID: 48189786}
@@ -14413,6 +14463,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 307921235}
     m_Modifications:
+    - target: {fileID: 718941022555090423, guid: 5e7e52f7b1e3a09408afe38b46caee7b, type: 3}
+      propertyPath: uiShake
+      value: 
+      objectReference: {fileID: 1353142061}
     - target: {fileID: 5273840439337725099, guid: 5e7e52f7b1e3a09408afe38b46caee7b, type: 3}
       propertyPath: m_Name
       value: TriggerDrainStamina
