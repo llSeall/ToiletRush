@@ -160,9 +160,9 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 56e49745a6c67224393ccb8f14eba897, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -170,8 +170,8 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 2.255207
-  MaxDistance: 4.1062007
+  MinDistance: 1.0055132
+  MaxDistance: 2.5429971
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -488,6 +488,7 @@ MonoBehaviour:
   alertColor: {r: 1, g: 0, b: 0, a: 1}
   gameOverImage: {fileID: 0}
   gameOverSprite: {fileID: 0}
+  alertLoopSound: {fileID: 8300000, guid: 330f6f56c5c9ad44998ea7f3ba1d1c56, type: 3}
   idleDuration: 1.2
 --- !u!136 &5454009242531547165
 CapsuleCollider:

@@ -123,6 +123,7 @@ MonoBehaviour:
   quest: {fileID: 0}
   useImageEffect: 1
   imgEffect: {fileID: 582728560520930168}
+  questCompleteSound: {fileID: 8300000, guid: c964be9c91226e947bd69bc4f0aeec47, type: 3}
 --- !u!1 &1018921429619631342
 GameObject:
   m_ObjectHideFlags: 0
@@ -400,6 +401,7 @@ MonoBehaviour:
   quest: {fileID: 0}
   useImageEffect: 0
   imgEffect: {fileID: 0}
+  questCompleteSound: {fileID: 8300000, guid: c964be9c91226e947bd69bc4f0aeec47, type: 3}
 --- !u!1 &5055903122418367870
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,6 +13,10 @@ PrefabInstance:
       value: Water Variant
       objectReference: {fileID: 0}
     - target: {fileID: 1809985331597790384, guid: 96a9de0949ed36e4587b532f7a4325bb, type: 3}
+      propertyPath: triggerSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 7de79cf8e663a8d4eb1862d02539dbdf, type: 3}
+    - target: {fileID: 1809985331597790384, guid: 96a9de0949ed36e4587b532f7a4325bb, type: 3}
       propertyPath: gameOverSprite
       value: 
       objectReference: {fileID: 21300000, guid: adb084a39d61b4145a95105476b3ab01, type: 3}
@@ -60,6 +64,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4717861835807104077, guid: 96a9de0949ed36e4587b532f7a4325bb, type: 3}
+      propertyPath: enterSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 330f6f56c5c9ad44998ea7f3ba1d1c56, type: 3}
     - target: {fileID: 5381658543622125568, guid: 96a9de0949ed36e4587b532f7a4325bb, type: 3}
       propertyPath: m_SortingOrder
       value: 1

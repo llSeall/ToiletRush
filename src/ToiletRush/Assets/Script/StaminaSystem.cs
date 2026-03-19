@@ -220,6 +220,15 @@ public class StaminaSystem : MonoBehaviour
     {
         Debug.Log("GAME OVER : Stamina หมด");
 
+        //  หยุด heartbeat
+        StopHeartbeat();
+
+        //  หยุดเสียง one-shot ที่อาจค้างอยู่
+        if (sfxSource != null)
+            sfxSource.Stop();
+
+       
+
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
 

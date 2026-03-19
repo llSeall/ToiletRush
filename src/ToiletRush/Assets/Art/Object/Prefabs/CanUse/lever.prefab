@@ -184,6 +184,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameras:
   - {fileID: 0}
+  disableSound: {fileID: 8300000, guid: fd82d62c7e508bd4fa6f87e6f52c5adf, type: 3}
+  spriteRenderer: {fileID: 2130090948207411198}
+  afterTriggerSprite: {fileID: -105957849, guid: 6b6ac451c5e65444490e5a125f84508f, type: 3}
 --- !u!135 &9072682217060846513
 SphereCollider:
   m_ObjectHideFlags: 0

@@ -5,19 +5,24 @@ public class PhotoNPCQTE : MonoBehaviour
     [Header("QTE Settings")]
     public float timeToPress = 1.5f;
     public KeyCode requiredKey = KeyCode.Space;
+
     [Header("Game Over")]
     public GameObject gameOverCanvas;
 
     [Header("References")]
     public QTE_UI_Controller qteUI;
-    public MonoBehaviour playerMovementScript;   // ใส่สคริปต์เดินของผู้เล่น
+    public MonoBehaviour playerMovementScript;
     public Animator playerAnimator;
+
     [Header("Game Over Image")]
-    public UnityEngine.UI.Image gameOverImage;   // ตัว Image บน Canvas
-    public Sprite gameOverSprite;                // รูปเหตุผลของฉากนี้
+    public UnityEngine.UI.Image gameOverImage;
+    public Sprite gameOverSprite;
 
     [Header("Animation Parameter")]
-    public string poseTriggerName = "Pose"; // Trigger ใน Animator
+    public string poseTriggerName = "Pose";
+
+    [Header("Sound")]
+    public AudioClip triggerSound;   //  เสียงตอนเข้า QTE
 
     private bool qteActive = false;
 
@@ -25,6 +30,12 @@ public class PhotoNPCQTE : MonoBehaviour
     {
         if (other.CompareTag("Player") && !qteActive)
         {
+            //  เล่นเสียงครั้งเดียวตอนเหยียบ
+            if (triggerSound != null)
+            {
+                AudioSource.PlayClipAtPoint(triggerSound, other.transform.position);
+            }
+
             StartQTE();
         }
     }
@@ -49,6 +60,7 @@ public class PhotoNPCQTE : MonoBehaviour
         EndQTE();
         Debug.Log("แอคทัน!");
     }
+
     void QTEFail()
     {
         EndQTE();
@@ -56,20 +68,23 @@ public class PhotoNPCQTE : MonoBehaviour
 
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
+
         if (gameOverImage != null && gameOverSprite != null)
             gameOverImage.sprite = gameOverSprite;
+
         Time.timeScale = 0f;
         enabled = false;
-
     }
-
 
     void EndQTE()
     {
         qteActive = false;
-        playerAnimator.SetBool("Pose", false);
 
-        playerAnimator.SetFloat("Speed", 0f);
+        if (playerAnimator != null)
+        {
+            playerAnimator.SetBool("Pose", false);
+            playerAnimator.SetFloat("Speed", 0f);
+        }
 
         // ปลด Freeze
         if (playerMovementScript != null)
