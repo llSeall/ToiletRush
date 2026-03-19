@@ -2420,7 +2420,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &52953456
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2433,10 +2433,10 @@ RectTransform:
   m_LocalScale: {x: 0.7052034, y: 0.7052034, z: 0.7052034}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1785032915}
-  - {fileID: 1479921797}
-  - {fileID: 1160089642}
   - {fileID: 1656687798}
+  - {fileID: 1160089642}
+  - {fileID: 1479921797}
+  - {fileID: 1785032915}
   m_Father: {fileID: 75805351}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -71266,6 +71266,7 @@ GameObject:
   - component: {fileID: 1515256611}
   - component: {fileID: 1515256610}
   - component: {fileID: 1515256618}
+  - component: {fileID: 1515256619}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -71280,7 +71281,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1515256609}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 327c28ccc673c9b40a99bd9e4bf391d2, type: 3}
   m_Name: 
@@ -71430,6 +71431,21 @@ MonoBehaviour:
   fadeDuration: 1.5
   normalVolume: 1
   mutedVolume: 0
+--- !u!114 &1515256619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515256609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ab4842e5f205d041a9803e463a80b5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 2d58d8c6244fe064595a70c7e3ed8c78, type: 3}
+  hoverSound: {fileID: 8300000, guid: 25f491e30f9c9a04fa801c946a4a0d75, type: 3}
+  hoverCooldown: 0.05
 --- !u!1001 &1516570375
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -83855,18 +83871,6 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1121965022}
         m_TargetAssemblyTypeName: SceneButtonController, Assembly-CSharp
-        m_MethodName: LoadNextLevel
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: LevelLoader, Assembly-CSharp
         m_MethodName: LoadNextLevel
         m_Mode: 1
         m_Arguments:
