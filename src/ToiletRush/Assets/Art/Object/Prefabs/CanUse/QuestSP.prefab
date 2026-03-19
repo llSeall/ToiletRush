@@ -19,7 +19,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4303748989859759658
 Transform:
   m_ObjectHideFlags: 0
@@ -273,8 +273,9 @@ MonoBehaviour:
   questName: Minidelivery
   playerAnimator: {fileID: 0}
   qteSystem: {fileID: 0}
-  requireDeliveryAfterMiniGame: 1
   startMiniGameTrigger: {fileID: 8398290685952436651}
+  miniGameDeliverTrigger: {fileID: 4069545105579829475}
+  requireDeliveryAfterMiniGame: 1
   miniGameCompleted: 0
 --- !u!1 &1274939409413333416
 GameObject:
