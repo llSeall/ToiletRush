@@ -67,7 +67,7 @@ PrefabInstance:
     - target: {fileID: -4683669308469848369, guid: f064b8b7ef11f3749b974741de168a6a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: c41ffe9a289dbbf4ea16f3a48ffe474d, type: 2}
+      objectReference: {fileID: 2100000, guid: 91de274f6b125a54e8d152e7232a3ab6, type: 2}
     - target: {fileID: -4683669308469848369, guid: f064b8b7ef11f3749b974741de168a6a, type: 3}
       propertyPath: m_Materials.Array.data[1]
       value: 
@@ -75,7 +75,7 @@ PrefabInstance:
     - target: {fileID: -4683669308469848369, guid: f064b8b7ef11f3749b974741de168a6a, type: 3}
       propertyPath: m_Materials.Array.data[2]
       value: 
-      objectReference: {fileID: 2100000, guid: c41ffe9a289dbbf4ea16f3a48ffe474d, type: 2}
+      objectReference: {fileID: 2100000, guid: 91de274f6b125a54e8d152e7232a3ab6, type: 2}
     - target: {fileID: 919132149155446097, guid: f064b8b7ef11f3749b974741de168a6a, type: 3}
       propertyPath: m_Name
       value: Conference table
