@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
 [RequireComponent(typeof(AudioSource))]
 public class TriggerReduceStamina : MonoBehaviour
@@ -8,23 +10,48 @@ public class TriggerReduceStamina : MonoBehaviour
 
     [Header("Animation")]
     public string hitTriggerName = "Hit2";
+
     [Header("UI Effect")]
     public UIShake uiShake;
+
+    // ---------- HIT REACTION UI ----------
+    [Header("Hit Reaction UI")]
+    public Image hitImage;
+    public Sprite hitSprite;
+    public float showTime = 0.15f;
+
+    private Coroutine showRoutine;
+
     [Header("Sound")]
-    public AudioClip hitSound;   // เสียงตอนโดน
+    public AudioClip hitSound;
     private AudioSource audioSource;
+
+    //  กัน trigger ซ้ำ
+    private bool hasTriggered = false;
 
     private void Start()
     {
         audioSource = GetComponent<AudioSource>();
+
+        //  กันภาพค้างตั้งแต่เริ่ม
+        if (hitImage != null)
+            hitImage.gameObject.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
+        //  กันยิงซ้ำ
+        if (hasTriggered) return;
+
+        //  กันหลาย collider
+        if (!other.transform.root.CompareTag("Player")) return;
+
+        hasTriggered = true;
+
+        Transform playerRoot = other.transform.root;
 
         // ===== ลด Stamina =====
-        StaminaSystem stamina = other.GetComponentInParent<StaminaSystem>();
+        StaminaSystem stamina = playerRoot.GetComponentInChildren<StaminaSystem>();
 
         if (stamina != null)
         {
@@ -37,33 +64,56 @@ public class TriggerReduceStamina : MonoBehaviour
         }
 
         // ===== Animation =====
-        Animator anim = other.GetComponentInParent<Animator>();
+        Animator anim = playerRoot.GetComponentInChildren<Animator>();
         if (anim != null)
         {
             anim.SetTrigger(hitTriggerName);
         }
-        else
-        {
-            Debug.LogError("Animator NOT FOUND on Player");
-        }
 
-        // =====  เล่นเสียง =====
-        //  เสียง (ไม่โดนตัด)
+        // ===== เสียง =====
         if (hitSound != null)
         {
             AudioSource.PlayClipAtPoint(hitSound, transform.position);
         }
 
-        //  เขย่า UI
+        // ===== UI Shake =====
         if (uiShake != null)
         {
             uiShake.Shake();
         }
 
-        // ===== ทำลายวัตถุ =====
+        // ===== UI Reaction =====
+        ShowHitFlash();
+
+        // ===== Destroy =====
         if (destroyAfterTrigger)
         {
-            Destroy(gameObject, 0.1f); // delay นิดนึงให้เสียงติดก่อน
+            Destroy(gameObject, 0.1f);
         }
+    }
+
+    // ---------- UI ----------
+    void ShowHitFlash()
+    {
+        if (hitImage == null) return;
+
+        hitImage.sprite = hitSprite;
+        hitImage.gameObject.SetActive(true);
+
+        if (showRoutine != null)
+            StopCoroutine(showRoutine);
+
+        showRoutine = StartCoroutine(ShowRoutine());
+    }
+
+    IEnumerator ShowRoutine()
+    {
+        yield return new WaitForSeconds(showTime);
+
+        if (hitImage != null)
+            hitImage.gameObject.SetActive(false);
+
+        //  reset ให้ trigger ใช้ซ้ำได้ (ถ้าไม่ destroy)
+        hasTriggered = false;
     }
 }

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using System.Collections;
 
 public class StaminaSystem : MonoBehaviour
 {
@@ -36,21 +37,69 @@ public class StaminaSystem : MonoBehaviour
     public float pulseSpeed = 1.5f;
     public float pulseAmount = 0.1f;
     private float pulseTimer;
+
+    // ================= AUDIO =================
     [Header("Audio")]
-    public AudioSource sfxSource;        // เสียงกระชาก (one shot)
-    public AudioSource heartbeatSource;  // เสียงหัวใจ (loop)
+    public AudioSource sfxSource;
+    public AudioSource heartbeatSource;
 
     [Header("Phase Sounds")]
     public AudioClip shockPhase2Clip;
     public AudioClip shockPhase3Clip;
-
     public AudioClip heartbeatPhase2;
     public AudioClip heartbeatPhase3;
+
+    //  MUSIC SYSTEM
+    [Header("Music")]
+    public AudioSource musicSource;
+    public AudioClip phase1Music;
+    public AudioClip phase2Music;
+    public AudioClip phase3Music;
+
+    [Range(0f, 1f)] public float phase1Volume = 0.2f;
+    [Range(0f, 1f)] public float phase2Volume = 0.5f;
+    [Range(0f, 1f)] public float phase3Volume = 1f;
+
+    public float musicFadeSpeed = 1.5f;
+    private float targetMusicVolume = 0f;
+
+    // ================= UI SYSTEM =================
+    [Header("Main UI Image")]
+    public Image reactionImage;
+    private Sprite defaultSprite;
+
+    [Header("QTE UI Override")]
+    public Sprite qteSprite;
+    private bool isQTEActive = false;
+
+    [System.Serializable]
+    public class ReactionMapping
+    {
+        public string tag;
+        public Sprite sprite;
+    }
+
+    [Header("Hit Reaction UI")]
+    public float reactionTime = 0.15f;
+    public ReactionMapping[] reactionMappings;
+
+    private Coroutine reactionRoutine;
+    private bool isShowingReaction = false;
+    private bool allowMusic = false;
     private int currentPhase = 0;
+
+    [Header("Sweat Particles")]
+    public ParticleSystem sweatParticleInstance; // ใช้เป็น instance ติดตัวผู้เล่น
+    public Transform sweatSpawnPoint;             // จุด spawn บนตัวละคร (เช่นไหล่/หัว)
+    public float sweatIntervalPhase2 = 1.5f;      // วินาทีระหว่าง spawn ในเฟส 2
+    public float sweatIntervalPhase3 = 0.5f;      // วินาทีระหว่าง spawn ในเฟส 3
+    private float sweatTimer = 0f;
 
     void Start()
     {
-        uiShake = staminaSlider.GetComponentInParent<StaminaUIShake>();
+        if (staminaSlider != null)
+            uiShake = staminaSlider.GetComponentInParent<StaminaUIShake>();
+
         currentStamina = maxStamina;
 
         if (volume != null)
@@ -64,7 +113,110 @@ public class StaminaSystem : MonoBehaviour
             staminaSlider.maxValue = maxStamina;
             staminaSlider.value = currentStamina;
         }
+
+        if (reactionImage != null)
+            defaultSprite = reactionImage.sprite;
+
+        // ตรวจสอบ Particle System instance
+        if (sweatParticleInstance != null && sweatSpawnPoint != null)
+        {
+            // ให้เป็น child ของตัวผู้เล่น
+            sweatParticleInstance.transform.SetParent(sweatSpawnPoint);
+            sweatParticleInstance.transform.localPosition = Vector3.zero;
+            sweatParticleInstance.Stop();
+            var main = sweatParticleInstance.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.Local;
+        }
+
+        //  เริ่มเพลง
     }
+
+    void Update()
+    {
+        DrainStamina();
+        UpdateUI();
+
+        float percent = currentStamina / maxStamina;
+
+        //  ไม่ให้ QTE ไปทับ UI stamina
+        if (!isShowingReaction && !isQTEActive && staminaVisualUI != null)
+        {
+            staminaVisualUI.UpdateStaminaVisual(percent);
+        }
+
+        if (uiShake != null)
+        {
+            bool low = percent <= 0.25f;
+            uiShake.SetLowStamina(low);
+        }
+
+        HandlePhaseEffects(percent);
+        UpdatePostProcessing(percent);
+
+        //  Smooth music fade
+        if (allowMusic && musicSource != null)
+        {
+            musicSource.volume = Mathf.Lerp(
+                musicSource.volume,
+                targetMusicVolume,
+                Time.deltaTime * musicFadeSpeed
+            );
+        }
+
+        if (currentStamina <= 0)
+            GameOver();
+
+        // ======= Control Sweat Particle by Phase =======
+        if (sweatParticleInstance != null)
+        {
+            if (currentPhase == 2)
+            {
+                sweatTimer += Time.deltaTime;
+                if (sweatTimer >= sweatIntervalPhase2)
+                {
+                    sweatTimer = 0f;
+                    PlaySweat();
+                }
+            }
+            else if (currentPhase == 3)
+            {
+                sweatTimer += Time.deltaTime;
+                if (sweatTimer >= sweatIntervalPhase3)
+                {
+                    sweatTimer = 0f;
+                    PlaySweat();
+                }
+            }
+            else
+            {
+                sweatTimer = 0f;
+                StopSweat();
+            }
+        }
+    }
+
+    // ================= MUSIC =================
+    void SetMusic(AudioClip clip, float volume)
+    {
+        if (!allowMusic) return;
+
+        if (musicSource == null || clip == null) return;
+
+        if (musicSource.clip != clip)
+        {
+            musicSource.clip = clip;
+            musicSource.loop = true;
+            musicSource.Play();
+        }
+
+        targetMusicVolume = volume;
+    }
+    public void EnableMusic()
+    {
+        allowMusic = true;
+        SetMusic(phase1Music, phase1Volume);
+    }
+    // ================= AUDIO =================
     void PlayShock(AudioClip clip)
     {
         if (sfxSource != null && clip != null)
@@ -79,7 +231,6 @@ public class StaminaSystem : MonoBehaviour
         heartbeatSource.loop = true;
         heartbeatSource.volume = volume;
         heartbeatSource.pitch = pitch;
-
         heartbeatSource.Play();
     }
 
@@ -88,29 +239,8 @@ public class StaminaSystem : MonoBehaviour
         if (heartbeatSource != null)
             heartbeatSource.Stop();
     }
-    void Update()
-    {
-        DrainStamina();
-        UpdateUI();
 
-        float percent = currentStamina / maxStamina;
-
-        staminaVisualUI.UpdateStaminaVisual(percent);
-
-        if (uiShake != null)
-        {
-            bool low = percent <= 0.25f;
-            uiShake.SetLowStamina(low);
-        }
-
-        HandlePhaseEffects(percent);
-        UpdatePostProcessing(percent);
-
-        if (currentStamina <= 0)
-            GameOver();
-    }
-
-    //  Phase Control
+    // ================= PHASE =================
     void HandlePhaseEffects(float percent)
     {
         int newPhase = 0;
@@ -124,44 +254,103 @@ public class StaminaSystem : MonoBehaviour
         {
             currentPhase = newPhase;
 
-            //  Phase 2
             if (currentPhase == 2)
             {
-                staminaVisualUI.PlayShock(1f);
+                staminaVisualUI?.PlayShock(1f);
+                staminaVisualUI?.StartLightShake(0.5f);
 
-                //  เสียงกระชาก sync กับภาพ
                 PlayShock(shockPhase2Clip);
-
-                staminaVisualUI.StartLightShake(0.5f);
-
-                // heartbeat เบา
                 PlayHeartbeat(heartbeatPhase2, 0.4f, 1f);
-            }
 
-            //  Phase 3
+                SetMusic(phase2Music, phase2Volume);
+            }
             else if (currentPhase == 3)
             {
-                staminaVisualUI.PlayShock(1.5f);
+                staminaVisualUI?.PlayShock(1.5f);
+                staminaVisualUI?.StartHeavyShake();
 
-                //  เสียงกระชากแรง
                 PlayShock(shockPhase3Clip);
-
-                staminaVisualUI.StartHeavyShake();
-
-                //  heartbeat หนักขึ้น
                 PlayHeartbeat(heartbeatPhase3, 0.8f, 1.2f);
-            }
 
-            // กลับปกติ
+                SetMusic(phase3Music, phase3Volume);
+            }
             else
             {
-                staminaVisualUI.StopAllEffects();
+                staminaVisualUI?.StopAllEffects();
                 StopHeartbeat();
+
+                SetMusic(phase1Music, phase1Volume);
             }
         }
     }
 
-    //  Post Processing
+    // ================= QTE =================
+    public void StartQTEUI()
+    {
+        if (reactionImage == null || qteSprite == null) return;
+
+        isQTEActive = true;
+        isShowingReaction = true;
+
+        reactionImage.sprite = qteSprite;
+    }
+
+    public void StopQTEUI()
+    {
+        isQTEActive = false;
+        isShowingReaction = false;
+
+        if (reactionImage != null && defaultSprite != null)
+            reactionImage.sprite = defaultSprite;
+    }
+
+    public void PlayQTEShake()
+    {
+        uiShake?.PlayHitShake();
+    }
+
+    // ================= HIT REACTION =================
+    private void OnTriggerEnter(Collider other)
+    {
+        if (isQTEActive) return;
+
+        foreach (var map in reactionMappings)
+        {
+            if (map != null && other.CompareTag(map.tag) && map.sprite != null)
+            {
+                ShowHitReaction(map.sprite);
+                break;
+            }
+        }
+    }
+
+    void ShowHitReaction(Sprite sprite)
+    {
+        if (reactionImage == null) return;
+
+        isShowingReaction = true;
+        reactionImage.sprite = sprite;
+
+        if (reactionRoutine != null)
+            StopCoroutine(reactionRoutine);
+
+        reactionRoutine = StartCoroutine(ReactionRoutine());
+    }
+
+    IEnumerator ReactionRoutine()
+    {
+        yield return new WaitForSeconds(reactionTime);
+
+        if (!isQTEActive)
+        {
+            isShowingReaction = false;
+
+            if (reactionImage != null && defaultSprite != null)
+                reactionImage.sprite = defaultSprite;
+        }
+    }
+
+    // ================= POST PROCESS =================
     void UpdatePostProcessing(float percent)
     {
         if (vignette == null || chromatic == null) return;
@@ -181,7 +370,6 @@ public class StaminaSystem : MonoBehaviour
 
             pulseTimer += Time.deltaTime * pulseSpeed;
             float pulse = Mathf.Sin(pulseTimer) * pulseAmount;
-
             targetVignette += pulse;
         }
 
@@ -189,14 +377,14 @@ public class StaminaSystem : MonoBehaviour
         chromatic.intensity.value = Mathf.Lerp(chromatic.intensity.value, targetChromatic, Time.deltaTime * 3f);
     }
 
+    // ================= STAMINA =================
     public void ReduceStamina(float amount)
     {
         currentStamina -= amount;
         currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
         UpdateUI();
 
-        if (uiShake != null)
-            uiShake.PlayHitShake();
+        uiShake?.PlayHitShake();
     }
 
     void DrainStamina()
@@ -216,18 +404,18 @@ public class StaminaSystem : MonoBehaviour
             staminaSlider.value = currentStamina;
     }
 
+    // ================= GAME OVER =================
     void GameOver()
     {
         Debug.Log("GAME OVER : Stamina หมด");
 
-        //  หยุด heartbeat
         StopHeartbeat();
 
-        //  หยุดเสียง one-shot ที่อาจค้างอยู่
         if (sfxSource != null)
             sfxSource.Stop();
 
-       
+        if (musicSource != null)
+            musicSource.Stop();
 
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
@@ -237,5 +425,26 @@ public class StaminaSystem : MonoBehaviour
 
         Time.timeScale = 0f;
         enabled = false;
+    }
+
+    // ================= SWEAT PARTICLE =================
+    void PlaySweat()
+    {
+        if (sweatParticleInstance == null) return;
+
+        if (!sweatParticleInstance.isPlaying)
+        {
+            sweatParticleInstance.Play();
+        }
+    }
+
+    void StopSweat()
+    {
+        if (sweatParticleInstance == null) return;
+
+        if (sweatParticleInstance.isPlaying)
+        {
+            sweatParticleInstance.Stop();
+        }
     }
 }

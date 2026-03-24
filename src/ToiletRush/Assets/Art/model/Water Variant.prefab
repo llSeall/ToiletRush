@@ -24,6 +24,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3520577172065295319, guid: 96a9de0949ed36e4587b532f7a4325bb, type: 3}
+      propertyPath: m_TagString
+      value: Water
+      objectReference: {fileID: 0}
     - target: {fileID: 3649585098792149591, guid: 96a9de0949ed36e4587b532f7a4325bb, type: 3}
       propertyPath: m_LocalPosition.x
       value: -11.47

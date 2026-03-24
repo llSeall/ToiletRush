@@ -101,7 +101,8 @@ public class NPCPatrolReduceStamina : MonoBehaviour
         //  VFX
         if (hitVFX != null)
         {
-            Instantiate(hitVFX, other.transform.position, Quaternion.identity);
+            Vector3 spawnPos = other.transform.position + Vector3.up * 1.2f; // ปรับค่านี้ได้
+            Instantiate(hitVFX, spawnPos, Quaternion.identity);
         }
 
         //  ลด stamina

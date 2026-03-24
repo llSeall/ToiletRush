@@ -24,7 +24,7 @@ public class StartLevelUI : MonoBehaviour
 
     [Header("Input")]
     public KeyCode closeKey = KeyCode.Space;
-
+    public StaminaSystem staminaSystem;
     [Header("Press Animation")]
     public RectTransform pressButton;
     public float pressAnimSpeed = 2f;
@@ -80,6 +80,7 @@ public class StartLevelUI : MonoBehaviour
 
     public void StartGame()
     {
+
         if (!isShowingStart || isCountingDown) return;
 
         startPanel.SetActive(false);
@@ -114,7 +115,7 @@ public class StartLevelUI : MonoBehaviour
 
         //  เริ่มเกมจริง
         Time.timeScale = 1f;
-
+        staminaSystem.EnableMusic();
         //  เปิด BGM ตอนนับเสร็จ
         if (bgmSource != null)
         {

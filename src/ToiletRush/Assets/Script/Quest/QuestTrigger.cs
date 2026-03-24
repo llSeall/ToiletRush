@@ -19,7 +19,7 @@ public class QuestTrigger : MonoBehaviour
 
     [Header("Sound")]
     public AudioClip questCompleteSound; //  เสียงตอนเควสสำเร็จ
-
+    public AudioClip pickupSound;        //  เสียงตอนรับของ
     private void Start()
     {
         if (quest != null)
@@ -62,7 +62,15 @@ public class QuestTrigger : MonoBehaviour
         {
             case TriggerType.PickUp:
                 if (quest is DeliveryQuest deliveryQuest)
+                {
                     deliveryQuest.PickUpItem();
+
+                    //  เล่นเสียงตอนรับของ
+                    if (pickupSound != null)
+                    {
+                        AudioSource.PlayClipAtPoint(pickupSound, transform.position);
+                    }
+                }
                 break;
 
             case TriggerType.Deliver:

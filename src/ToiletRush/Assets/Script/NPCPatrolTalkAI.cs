@@ -10,21 +10,19 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
     [Header("Player Animation")]
     public Animator playerAnimator;
-    private State previousState;
 
     [Header("Patrol")]
     public Transform[] waypoints;
     public float moveSpeed = 2f;
     public float waitTimeAtPoint = 0.5f;
 
-    [Header("Detect (AI Zone)")]
+    [Header("Detect")]
     public float detectRadius = 5f;
     public float talkDistance = 1.5f;
     public LayerMask playerLayer;
 
     [Header("Chase")]
     public float chaseSpeed = 4f;
-    public float lostSightDelay = 0.6f;
 
     [Header("Player Control")]
     public MonoBehaviour playerMovement;
@@ -34,8 +32,10 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
     [Header("QTE")]
     public TalkQTEUI qteUI;
+    public StaminaSystem staminaSystem;
 
-    //  VOICE
+    private bool isQTEActive = false;
+
     [Header("Voice")]
     public AudioSource audioSource;
     public AudioClip maleVoice;
@@ -47,10 +47,10 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
     private int index;
     private int dir = 1;
+    private int patrolReturnIndex;
+
     private float waitTimer;
     private float stunTimer;
-    private float lostSightTimer;
-    private int patrolReturnIndex;
 
     void Start()
     {
@@ -66,23 +66,18 @@ public class NPCPatrolTalkAI : MonoBehaviour
         if (currentState == State.Patrol)
             DetectPlayer();
 
-        //  กันเสียงค้าง
         if (currentState != State.Talk && audioSource != null && audioSource.isPlaying)
             StopVoice();
-
-        if (currentState != previousState)
-        {
-            UpdateAnimationByState();
-            previousState = currentState;
-        }
 
         switch (currentState)
         {
             case State.Patrol: Patrol(); break;
             case State.Chase: Chase(); break;
-            case State.Talk: break;
+            case State.Talk: Talk(); break;
             case State.Stun: Stun(); break;
         }
+
+        UpdateAnimation();
     }
 
     // ================= DETECT =================
@@ -93,20 +88,11 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
         Transform target = hits[0].transform;
 
-        Vector3 origin = transform.position + Vector3.up * 0.8f;
-        Vector3 targetPos = target.position + Vector3.up * 0.8f;
-        Vector3 dir = targetPos - origin;
-
-        RaycastHit hit;
-        if (Physics.Raycast(origin, dir.normalized, out hit, dir.magnitude))
+        if (target.CompareTag("Player"))
         {
-            if (hit.transform.CompareTag("Player"))
-            {
-                player = target;
-                patrolReturnIndex = index;
-                lostSightTimer = 0f;
-                currentState = State.Chase;
-            }
+            player = target;
+            patrolReturnIndex = index;
+            currentState = State.Chase;
         }
     }
 
@@ -115,8 +101,7 @@ public class NPCPatrolTalkAI : MonoBehaviour
     {
         if (waypoints == null || waypoints.Length <= 1)
         {
-            if (animator != null)
-                animator.SetFloat("Speed", 0f);
+            SetSpeed(0);
             return;
         }
 
@@ -127,6 +112,8 @@ public class NPCPatrolTalkAI : MonoBehaviour
         if (dirMove.magnitude < 0.1f)
         {
             waitTimer += Time.deltaTime;
+            SetSpeed(0);
+
             if (waitTimer >= waitTimeAtPoint)
             {
                 index += dir;
@@ -142,9 +129,7 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
         controller.Move(dirMove.normalized * moveSpeed * Time.deltaTime);
         Rotate(dirMove);
-
-        if (animator != null)
-            animator.SetFloat("Speed", 1f);
+        SetSpeed(1);
     }
 
     // ================= CHASE =================
@@ -156,55 +141,42 @@ public class NPCPatrolTalkAI : MonoBehaviour
             return;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        float distance = Vector3.Distance(transform.position, player.position);
 
-        if (distanceToPlayer > detectRadius)
+        if (distance > detectRadius * 1.5f)
         {
             ResetToPatrol();
             return;
         }
 
-        Vector3 origin = transform.position + Vector3.up * 0.8f;
-        Vector3 targetPos = player.position + Vector3.up * 0.8f;
-        Vector3 dir = targetPos - origin;
-
-        RaycastHit hit;
-        if (Physics.Raycast(origin, dir.normalized, out hit, dir.magnitude))
-        {
-            if (!hit.transform.CompareTag("Player"))
-            {
-                lostSightTimer += Time.deltaTime;
-                if (lostSightTimer >= lostSightDelay)
-                {
-                    ResetToPatrol();
-                    return;
-                }
-            }
-            else
-            {
-                lostSightTimer = 0f;
-            }
-        }
-
-        if (distanceToPlayer <= talkDistance)
+        if (distance <= talkDistance)
         {
             StartTalk();
             return;
         }
 
+        Vector3 dir = player.position - transform.position;
         dir.y = 0;
+
         controller.Move(dir.normalized * chaseSpeed * Time.deltaTime);
         Rotate(dir);
-
-        if (animator != null)
-            animator.SetFloat("Speed", 1f);
+        SetSpeed(1);
     }
 
     // ================= TALK =================
     void StartTalk()
     {
-        currentState = State.Talk;
+        if (isQTEActive) return;
 
+        currentState = State.Talk;
+        isQTEActive = true;
+
+        if (player == null) return;
+        if (playerAnimator != null)
+        {
+            playerAnimator.SetBool("IsTalking", true);
+            playerAnimator.SetFloat("Speed", 0f); // กันค้างวิ่ง
+        }
         Vector3 lookDir = transform.position - player.position;
         lookDir.y = 0;
         player.rotation = Quaternion.LookRotation(lookDir);
@@ -212,48 +184,90 @@ public class NPCPatrolTalkAI : MonoBehaviour
         if (playerMovement != null)
             playerMovement.enabled = false;
 
-        if (playerAnimator != null)
-            playerAnimator.SetBool("IsTalking", true);
-
-        if (animator != null)
-            animator.SetBool("IsTalking", true);
-
         PlayVoice();
 
-        qteUI.StartQTE(this);
+        if (qteUI != null)
+            qteUI.StartQTE(this);
+
+        if (staminaSystem != null)
+            staminaSystem.StartQTEUI();
+    }
+
+    void Talk()
+    {
+        //  สำคัญ ล็อคไม่ให้เดิน
+        SetSpeed(0);
     }
 
     public void OnQTESuccess()
     {
+        
         StopVoice();
-
+        if (playerAnimator != null)
+        {
+            playerAnimator.SetBool("IsTalking", false);
+        }
+        isQTEActive = false;
         currentState = State.Stun;
         stunTimer = stunTime;
 
         if (playerMovement != null)
             playerMovement.enabled = true;
 
-        if (playerAnimator != null)
-            playerAnimator.SetBool("IsTalking", false);
+        if (qteUI != null)
+            qteUI.StopQTE();
 
-        if (animator != null)
-            animator.SetBool("IsTalking", false);
+        if (staminaSystem != null)
+            staminaSystem.StopQTEUI();
     }
 
+    // ================= STUN =================
     void Stun()
     {
         stunTimer -= Time.deltaTime;
+        SetSpeed(0);
+
         if (stunTimer <= 0f)
             ResetToPatrol();
     }
 
+    // ================= RESET =================
     void ResetToPatrol()
     {
         StopVoice();
+        if (playerAnimator != null)
+        {
+            playerAnimator.SetBool("IsTalking", false);
+        }
+        if (qteUI != null)
+            qteUI.StopQTE();
+
+        if (staminaSystem != null)
+            staminaSystem.StopQTEUI();
+
+        isQTEActive = false;
 
         player = null;
-        lostSightTimer = 0f;
+        index = patrolReturnIndex;
+
         currentState = State.Patrol;
+    }
+
+    // ================= ANIMATION =================
+    void UpdateAnimation()
+    {
+        if (animator == null) return;
+
+        animator.SetBool("IsTalking", currentState == State.Talk);
+
+        if (currentState == State.Talk || currentState == State.Stun)
+            animator.SetFloat("Speed", 0f);
+    }
+
+    void SetSpeed(float value)
+    {
+        if (animator != null && currentState != State.Talk)
+            animator.SetFloat("Speed", value);
     }
 
     // ================= UTILS =================
@@ -266,30 +280,6 @@ public class NPCPatrolTalkAI : MonoBehaviour
             Quaternion.LookRotation(dir),
             Time.deltaTime * 5f
         );
-    }
-
-    void UpdateAnimationByState()
-    {
-        if (animator == null) return;
-
-        switch (currentState)
-        {
-            case State.Patrol:
-            case State.Chase:
-                animator.SetBool("IsTalking", false);
-                animator.SetFloat("Speed", 1f);
-                break;
-
-            case State.Talk:
-                animator.SetFloat("Speed", 0f);
-                animator.SetBool("IsTalking", true);
-                break;
-
-            case State.Stun:
-                animator.SetBool("IsTalking", false);
-                animator.SetFloat("Speed", 0f);
-                break;
-        }
     }
 
     // ================= VOICE =================
@@ -309,7 +299,7 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
     void StopVoice()
     {
-        if (audioSource == null) return;
-        audioSource.Stop();
+        if (audioSource != null)
+            audioSource.Stop();
     }
 }

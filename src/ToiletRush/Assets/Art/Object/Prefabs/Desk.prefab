@@ -49,9 +49,17 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -4683669308469848369, guid: 2d602598add3f354b8f27bc8c2492c77, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -4683669308469848369, guid: 2d602598add3f354b8f27bc8c2492c77, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 6fc167fae87c5b844b705638cddf43e7, type: 2}
+    - target: {fileID: -4683669308469848369, guid: 2d602598add3f354b8f27bc8c2492c77, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: c41ffe9a289dbbf4ea16f3a48ffe474d, type: 2}
     - target: {fileID: 919132149155446097, guid: 2d602598add3f354b8f27bc8c2492c77, type: 3}
       propertyPath: m_Name
       value: Desk
@@ -62,22 +70,22 @@ PrefabInstance:
     - {fileID: 65702495048144492, guid: 2d602598add3f354b8f27bc8c2492c77, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2d602598add3f354b8f27bc8c2492c77, type: 3}
+    - targetCorrespondingSourceObject: {fileID: -8391222552659086748, guid: 2d602598add3f354b8f27bc8c2492c77, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 9203933973081356595}
+      addedObject: {fileID: 1838790460740623185}
   m_SourcePrefab: {fileID: 100100000, guid: 2d602598add3f354b8f27bc8c2492c77, type: 3}
---- !u!1 &6426574661789157532 stripped
+--- !u!1 &6801224642401339305 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 2d602598add3f354b8f27bc8c2492c77, type: 3}
+  m_CorrespondingSourceObject: {fileID: -8391222552659086748, guid: 2d602598add3f354b8f27bc8c2492c77, type: 3}
   m_PrefabInstance: {fileID: 6192078175270680013}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &9203933973081356595
+--- !u!65 &1838790460740623185
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6426574661789157532}
+  m_GameObject: {fileID: 6801224642401339305}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -90,5 +98,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0.027254257, y: 0.017696103, z: 0.028344272}
+  m_Center: {x: 0.0012061936, y: 0.0011519459, z: 0.004172138}

@@ -18,6 +18,9 @@ public class DoorQTESwing : MonoBehaviour
     public float startScale = 0.15f;
     public float endScale = 1f;
 
+    [Header("Player UI Link")]
+    public StaminaSystem staminaSystem;
+
     [Header("Control")]
     public MonoBehaviour playerMovement;
 
@@ -27,7 +30,7 @@ public class DoorQTESwing : MonoBehaviour
     public AudioClip successClip;
 
     [Header("Audio Timing")]
-    public float openDelay = 0.05f; //  ปรับตรงนี้
+    public float openDelay = 0.05f;
 
     [Header("Audio Setting")]
     public float hitCooldown = 0.1f;
@@ -41,7 +44,9 @@ public class DoorQTESwing : MonoBehaviour
     void Start()
     {
         door = GetComponent<SimpleSwingDoor>();
-        qteUI.SetActive(false);
+
+        if (qteUI != null)
+            qteUI.SetActive(false);
     }
 
     void Update()
@@ -56,15 +61,21 @@ public class DoorQTESwing : MonoBehaviour
             {
                 PlayHitSound();
                 lastHitTime = Time.time;
+
+                if (staminaSystem != null)
+                    staminaSystem.PlayQTEShake();
             }
         }
 
         progress -= decayPerSecond * Time.deltaTime;
         progress = Mathf.Clamp01(progress);
 
-        progressCircle.fillAmount = progress;
-        progressCircle.transform.localScale =
-            Vector3.one * Mathf.Lerp(startScale, endScale, progress);
+        if (progressCircle != null)
+        {
+            progressCircle.fillAmount = progress;
+            progressCircle.transform.localScale =
+                Vector3.one * Mathf.Lerp(startScale, endScale, progress);
+        }
 
         if (progress >= 1f)
         {
@@ -75,8 +86,7 @@ public class DoorQTESwing : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        if (active) return;
-        if (hasTriggered) return;
+        if (active || hasTriggered) return;
 
         hasTriggered = true;
         StartQTE();
@@ -93,10 +103,17 @@ public class DoorQTESwing : MonoBehaviour
         if (playerMovement != null)
             playerMovement.enabled = false;
 
-        progressCircle.fillAmount = 0f;
-        progressCircle.transform.localScale = Vector3.one * startScale;
+        if (progressCircle != null)
+        {
+            progressCircle.fillAmount = 0f;
+            progressCircle.transform.localScale = Vector3.one * startScale;
+        }
 
-        qteUI.SetActive(true);
+        if (qteUI != null)
+            qteUI.SetActive(true);
+
+        if (staminaSystem != null)
+            staminaSystem.StartQTEUI();
     }
 
     void Success()
@@ -105,28 +122,31 @@ public class DoorQTESwing : MonoBehaviour
             playerAnimator.SetBool("IsShakingDoor", false);
 
         active = false;
-        qteUI.SetActive(false);
+
+        if (qteUI != null)
+            qteUI.SetActive(false);
 
         if (playerMovement != null)
             playerMovement.enabled = true;
 
-        //  ใช้ coroutine sync เสียงกับประตู
+        if (staminaSystem != null)
+            staminaSystem.StopQTEUI();
+
         StartCoroutine(OpenDoorWithSound());
     }
 
     IEnumerator OpenDoorWithSound()
     {
-        //  เล่นเสียงก่อน
         if (audioSource != null && successClip != null)
         {
             audioSource.pitch = 1f;
             audioSource.PlayOneShot(successClip);
         }
 
-        //  รอเล็กน้อยให้ตรงจังหวะ animation
         yield return new WaitForSeconds(openDelay);
 
-        door.OpenDoor();
+        if (door != null)
+            door.OpenDoor();
     }
 
     void PlayHitSound()
@@ -136,5 +156,12 @@ public class DoorQTESwing : MonoBehaviour
             audioSource.pitch = Random.Range(0.9f, 1.1f);
             audioSource.PlayOneShot(hitClip);
         }
+    }
+
+    private void OnDisable()
+    {
+        //  กัน UI ค้าง
+        if (staminaSystem != null)
+            staminaSystem.StopQTEUI();
     }
 }

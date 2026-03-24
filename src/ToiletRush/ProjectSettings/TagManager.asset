@@ -6,6 +6,11 @@ TagManager:
   tags:
   - Wall
   - Enemy
+  - Banana
+  - Water
+  - Quest
+  - Talker
+  - Girl
   layers:
   - Default
   - TransparentFX
@@ -16,7 +21,7 @@ TagManager:
   - Wall
   - Enemy
   - Outline
-  - 
+  - Camera
   - 
   - 
   - 

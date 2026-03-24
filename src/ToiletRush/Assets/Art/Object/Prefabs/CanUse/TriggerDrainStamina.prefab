@@ -100,7 +100,7 @@ GameObject:
   - component: {fileID: 3254825488494479565}
   m_Layer: 0
   m_Name: TriggerDrainStamina
-  m_TagString: Untagged
+  m_TagString: Banana
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -208,6 +208,9 @@ MonoBehaviour:
   destroyAfterTrigger: 1
   hitTriggerName: Hit2
   uiShake: {fileID: 0}
+  hitImage: {fileID: 0}
+  hitSprite: {fileID: 0}
+  showTime: 0.15
   hitSound: {fileID: 8300000, guid: 7de79cf8e663a8d4eb1862d02539dbdf, type: 3}
 --- !u!82 &3254825488494479565
 AudioSource:

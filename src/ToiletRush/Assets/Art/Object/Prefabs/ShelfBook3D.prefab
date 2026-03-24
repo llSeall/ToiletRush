@@ -53,9 +53,17 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -4683669308469848369, guid: c6437802f691d7840b23958499ffab05, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -4683669308469848369, guid: c6437802f691d7840b23958499ffab05, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: f3d5e9c3121cea34fa2cf7df5f3919ab, type: 2}
+    - target: {fileID: -4683669308469848369, guid: c6437802f691d7840b23958499ffab05, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: c41ffe9a289dbbf4ea16f3a48ffe474d, type: 2}
     - target: {fileID: 919132149155446097, guid: c6437802f691d7840b23958499ffab05, type: 3}
       propertyPath: m_Name
       value: ShelfBook3D
@@ -65,5 +73,34 @@ PrefabInstance:
     - {fileID: -8700617353114198275, guid: c6437802f691d7840b23958499ffab05, type: 3}
     - {fileID: 65702495048144492, guid: c6437802f691d7840b23958499ffab05, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: -8391222552659086748, guid: c6437802f691d7840b23958499ffab05, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5779081720875182059}
   m_SourcePrefab: {fileID: 100100000, guid: c6437802f691d7840b23958499ffab05, type: 3}
+--- !u!1 &5531225985165321942 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -8391222552659086748, guid: c6437802f691d7840b23958499ffab05, type: 3}
+  m_PrefabInstance: {fileID: 5138254464996758706}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &5779081720875182059
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5531225985165321942}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.02, y: 0.019999994, z: 0.019999998}
+  m_Center: {x: 0, y: 0, z: 0}

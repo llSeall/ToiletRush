@@ -1,29 +1,31 @@
 using UnityEngine;
+using UnityEngine.AI;
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(NavMeshAgent))]
 public class GuardAI : MonoBehaviour
 {
     public enum State { Patrol, Chase, Search, Return }
     public State currentState = State.Patrol;
 
-    [Header("Patrol")]
+    [Header("Patrol (Smart Random)")]
     public Transform[] waypoints;
-    public float patrolSpeed = 2f;
-    public float waitAtPoint = 0.5f;
+    public float patrolRadius = 6f;
+    public float waitAtPoint = 1f;
+    [Range(0, 1)] public float waypointBias = 0.6f;
 
     [Header("Chase")]
-    public float chaseSpeed = 4f;
     public float catchDistance = 1.2f;
 
     [Header("Search")]
-    public float searchDuration = 3f;
-    public float searchRadius = 2f;
-    public float searchSpeed = 2.5f;
+    public float searchDuration = 4f;
+    public float searchRadius = 4f;
 
     [Header("Vision")]
     public float viewDistance = 6f;
     [Range(0, 180)] public float viewAngle = 60f;
-    public LayerMask obstacleMask;
+
+    [Header("Vision Visual")]
+    public GameObject visionObject; //  เพิ่มตัวนี้
 
     [Header("Alert VFX")]
     public GameObject alertVFXPrefab;
@@ -49,41 +51,43 @@ public class GuardAI : MonoBehaviour
     public AudioClip alertLoopSound;
     private AudioSource alertAudio;
 
-    [Header("Idle")]
-    public float idleDuration = 1.2f;
-
-    private float idleTimer;
-    private bool isIdling;
-
-    private CharacterController controller;
+    private NavMeshAgent agent;
     private Transform player;
     private Animator animator;
 
-    private int currentIndex = 0;
-    private int direction = 1;
     private float waitTimer;
-
-    private int patrolReturnIndex;
     private Vector3 lastSeenPosition;
-
     private float searchTimer;
-    private Vector3 searchTarget;
+
+    //  ใหม่ delay การมองหาย
+    private float loseSightTimer = 0f;
+    public float loseSightDelay = 2f;
 
     void Start()
     {
+        agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-        controller = GetComponent<CharacterController>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
-        transform.position = waypoints[0].position;
         UpdateVisionColor(normalColor);
 
-        //  setup audio
+        agent.speed = 4.5f;
+        agent.angularSpeed = 180f;
+        agent.acceleration = 8f;
+        agent.autoBraking = false;
+        agent.stoppingDistance = 0f;
+        agent.acceleration = 20f;
+        agent.angularSpeed = 300f;
+        agent.stoppingDistance = 0f;
+
+
         alertAudio = gameObject.AddComponent<AudioSource>();
         alertAudio.clip = alertLoopSound;
         alertAudio.loop = true;
         alertAudio.playOnAwake = false;
-        alertAudio.spatialBlend = 1f; // 3D sound
+        alertAudio.spatialBlend = 1f;
+
+        PickNextPatrolPoint();
     }
 
     void Update()
@@ -101,59 +105,52 @@ public class GuardAI : MonoBehaviour
 
             case State.Search:
                 SearchArea();
+                CheckVision();
                 break;
 
             case State.Return:
                 ReturnToPatrol();
                 break;
         }
+
+        UpdateAnimation(agent.velocity.magnitude);
     }
 
     // ---------- PATROL ----------
     void Patrol()
     {
-        if (isIdling)
-        {
-            idleTimer += Time.deltaTime;
+        if (agent.pathPending) return;
 
-            if (idleTimer >= idleDuration)
+        if (agent.remainingDistance < 0.4f)
+        {
+            waitTimer += Time.deltaTime;
+
+            if (waitTimer >= waitAtPoint)
             {
-                isIdling = false;
-                NextPoint();
+                PickNextPatrolPoint();
+                waitTimer = 0f;
             }
-
-            UpdateAnimation(0f);
-            return;
-        }
-
-        Vector3 target = waypoints[currentIndex].position;
-
-        Vector3 flatPos = new Vector3(transform.position.x, 0, transform.position.z);
-        Vector3 flatTarget = new Vector3(target.x, 0, target.z);
-
-        MoveTo(target, patrolSpeed);
-        UpdateAnimation(patrolSpeed);
-
-        if (Vector3.Distance(flatPos, flatTarget) < 0.4f)
-        {
-            StartIdle();
         }
     }
 
-    void NextPoint()
+    void PickNextPatrolPoint()
     {
-        currentIndex += direction;
+        Vector3 target;
 
-        if (currentIndex >= waypoints.Length)
+        if (waypoints.Length > 0 && Random.value < 0.5f)
         {
-            direction = -1;
-            currentIndex = waypoints.Length - 2;
+            target = waypoints[Random.Range(0, waypoints.Length)].position;
         }
-        else if (currentIndex < 0)
+        else
         {
-            direction = 1;
-            currentIndex = 1;
+            do
+            {
+                target = GetRandomPointOnNavMesh(50f);
+            }
+            while (Vector3.Distance(transform.position, target) < 5f);
         }
+
+        agent.SetDestination(target);
     }
 
     // ---------- VISION ----------
@@ -162,179 +159,126 @@ public class GuardAI : MonoBehaviour
         Vector3 origin = transform.position + Vector3.up * 0.8f;
         Vector3 target = player.position + Vector3.up * 0.8f;
 
-        Vector3 dirToPlayer = (target - origin).normalized;
-        float distance = Vector3.Distance(origin, target);
+        Vector3 dir = (target - origin).normalized;
+        float dist = Vector3.Distance(origin, target);
 
-        if (distance > viewDistance) return;
+        if (dist > viewDistance) return;
 
-        float angle = Vector3.Angle(transform.forward, dirToPlayer);
+        float angle = Vector3.Angle(transform.forward, dir);
         if (angle > viewAngle * 0.5f) return;
 
         RaycastHit hit;
 
-        if (Physics.Raycast(origin, dirToPlayer, out hit, distance))
+        //  สำคัญ: ไม่ใช้ obstacleMask แล้ว
+        int mask = ~LayerMask.GetMask("Ignore Raycast");
+
+        if (Physics.Raycast(origin, dir, out hit, dist, mask, QueryTriggerInteraction.Ignore))
         {
-            if (hit.transform.CompareTag("Player"))
+            if (hit.transform.root.CompareTag("Player"))
             {
-                if (currentState != State.Chase)
-                {
-                    patrolReturnIndex = currentIndex;
-                    lastSeenPosition = player.position;
+                currentState = State.Chase;
+                UpdateVisionColor(alertColor);
 
-                    currentState = State.Chase;
-                    UpdateVisionColor(alertColor);
+                ShowAlertVFX();
+                SpawnShoutWave();
 
-                    ShowAlertVFX();
-                    SpawnShoutWave();
+                if (visionObject != null)
+                    visionObject.SetActive(false); // ปิด cone
 
-                    //  เริ่มเสียงเตือน
-                    if (alertLoopSound != null && !alertAudio.isPlaying)
-                    {
-                        alertAudio.Play();
-                    }
-                }
+                if (!alertAudio.isPlaying)
+                    alertAudio.Play();
             }
-        }
-        
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (currentState != State.Chase) return;
-
-        if (other.CompareTag("Player"))
-        {
-            CatchPlayer();
         }
     }
 
     // ---------- CHASE ----------
     void ChasePlayer()
     {
-        isIdling = false;
+        agent.SetDestination(player.position);
+        agent.speed = 4.5f;
+
+        float dist = Vector3.Distance(transform.position, player.position);
 
         UpdateShoutWavePosition();
 
-        float distance = Vector3.Distance(transform.position, player.position);
-
-        if (distance <= catchDistance)
+        if (dist <= catchDistance)
         {
             CatchPlayer();
             return;
         }
 
-        Vector3 dir = (player.position - transform.position).normalized;
-        controller.Move(dir * chaseSpeed * Time.deltaTime);
-        transform.rotation = Quaternion.LookRotation(dir);
-
-        if (distance > viewDistance)
+        //  ระบบ delay การมองหาย
+        if (dist > viewDistance)
         {
-            searchTimer = 0f;
-            PickNewSearchPoint();
+            loseSightTimer += Time.deltaTime;
 
-            currentState = State.Search;
-            UpdateVisionColor(normalColor);
-
-            HideAlertVFX();
-            RemoveShoutWave();
-
-            //  หยุดเสียงเตือน
-            if (alertAudio.isPlaying)
+            if (loseSightTimer >= loseSightDelay)
             {
+                lastSeenPosition = player.position;
+                searchTimer = 0f;
+
+                currentState = State.Search;
+                UpdateVisionColor(normalColor);
+
+                if (visionObject != null)
+                    visionObject.SetActive(true); //  เปิด cone กลับ
+
+                HideAlertVFX();
+                RemoveShoutWave();
                 alertAudio.Stop();
+
+                loseSightTimer = 0f;
             }
         }
-        UpdateShoutWavePosition();
-        UpdateAnimation(chaseSpeed);
+        else
+        {
+            loseSightTimer = 0f;
+        }
     }
 
     // ---------- SEARCH ----------
     void SearchArea()
     {
-        searchTimer += Time.deltaTime;
+        agent.SetDestination(lastSeenPosition);
 
-        if (isIdling)
+        if (!agent.pathPending && agent.remainingDistance < 0.5f)
         {
-            idleTimer += Time.deltaTime;
+            searchTimer += Time.deltaTime;
 
-            if (idleTimer >= idleDuration * 0.5f)
+            if (searchTimer >= searchDuration)
             {
-                isIdling = false;
-                PickNewSearchPoint();
+                currentState = State.Return;
             }
-
-            UpdateAnimation(0f);
-            return;
         }
-
-        MoveTo(searchTarget, searchSpeed);
-        UpdateAnimation(searchSpeed);
-        CheckVision();
-
-        if (Vector3.Distance(transform.position, searchTarget) < 0.3f)
-        {
-            StartIdle();
-        }
-
-        if (searchTimer >= searchDuration)
-        {
-            isIdling = false;
-            currentState = State.Return;
-        }
-    }
-
-    void PickNewSearchPoint()
-    {
-        Vector2 randomCircle = Random.insideUnitCircle * searchRadius;
-        searchTarget = lastSeenPosition + new Vector3(randomCircle.x, 0, randomCircle.y);
     }
 
     // ---------- RETURN ----------
     void ReturnToPatrol()
     {
-        Vector3 target = waypoints[patrolReturnIndex].position;
+        PickNextPatrolPoint();
+        currentState = State.Patrol;
 
-        Vector3 flatPos = new Vector3(transform.position.x, 0, transform.position.z);
-        Vector3 flatTarget = new Vector3(target.x, 0, target.z);
-
-        MoveTo(target, patrolSpeed);
-
-        if (Vector3.Distance(flatPos, flatTarget) < 0.4f)
-        {
-            StartIdle();
-            currentIndex = patrolReturnIndex;
-            currentState = State.Patrol;
-        }
-
-        UpdateAnimation(patrolSpeed);
+        if (visionObject != null)
+            visionObject.SetActive(true);
     }
 
-    // ---------- COMMON ----------
-    void MoveTo(Vector3 target, float speed)
+    // ---------- INVESTIGATE ----------
+    public void Investigate(Vector3 alertPosition)
     {
-        Vector3 dir = target - transform.position;
-        dir.y = 0;
+        lastSeenPosition = alertPosition;
+        currentState = State.Search;
+        searchTimer = 0f;
 
-        if (dir.magnitude < 0.05f) return;
-
-        controller.Move(dir.normalized * speed * Time.deltaTime);
-
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            Quaternion.LookRotation(dir),
-            Time.deltaTime * 5f
-        );
+        agent.SetDestination(alertPosition);
+        UpdateVisionColor(alertColor);
     }
 
+    // ---------- CATCH ----------
     void CatchPlayer()
     {
         HideAlertVFX();
         RemoveShoutWave();
-        if (alertAudio != null && alertAudio.isPlaying)
-        {
-            alertAudio.Stop();
-        }
-        Debug.Log("PLAYER CAUGHT!");
+        alertAudio.Stop();
 
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
@@ -346,6 +290,7 @@ public class GuardAI : MonoBehaviour
         enabled = false;
     }
 
+    // ---------- VISUAL ----------
     void UpdateVisionColor(Color c)
     {
         if (visionRenderer != null)
@@ -354,90 +299,62 @@ public class GuardAI : MonoBehaviour
 
     void UpdateAnimation(float speed)
     {
-        if (animator == null) return;
-        animator.SetFloat("Speed", speed);
+        if (animator != null)
+            animator.SetFloat("Speed", speed);
     }
 
-    void StartIdle()
-    {
-        isIdling = true;
-        idleTimer = 0f;
-        UpdateAnimation(0f);
-    }
-
-    // ---------- ALERT VFX ----------
+    // ---------- VFX ----------
     void ShowAlertVFX()
     {
         if (alertVFXPrefab == null || currentAlertVFX != null) return;
 
-        Vector3 pos = transform.position + Vector3.up * 2f;
-
-        currentAlertVFX = Instantiate(alertVFXPrefab, pos, Quaternion.identity);
+        currentAlertVFX = Instantiate(alertVFXPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
         currentAlertVFX.transform.SetParent(transform);
     }
 
     void HideAlertVFX()
     {
         if (currentAlertVFX != null)
-        {
             Destroy(currentAlertVFX);
-            currentAlertVFX = null;
-        }
     }
 
-    // ---------- SHOUT WAVE ----------
     void SpawnShoutWave()
     {
         if (shoutWavePrefab == null || currentShoutWave != null) return;
 
         currentShoutWave = Instantiate(shoutWavePrefab);
-
-        currentShoutWave.transform.parent = null; // สำคัญ
     }
+
     void UpdateShoutWavePosition()
     {
-        if (currentShoutWave == null) return;
-        if (player == null) return;
+        if (currentShoutWave == null || player == null) return;
 
-        Vector3 npcPos = transform.position;
-        Vector3 playerPos = player.position;
+        Vector3 mid = Vector3.Lerp(transform.position, player.position, 0.5f);
+        mid.y = transform.position.y + 1.5f;
 
-        Vector3 midPoint = Vector3.Lerp(npcPos, playerPos, 0.5f);
-
-        midPoint.y = npcPos.y + 1.5f;
-
-        currentShoutWave.transform.position = midPoint;
+        currentShoutWave.transform.position = mid;
     }
 
     void RemoveShoutWave()
     {
         if (currentShoutWave != null)
-        {
             Destroy(currentShoutWave);
-            currentShoutWave = null;
-        }
     }
 
-    // ---------- DEBUG ----------
+    Vector3 GetRandomPointOnNavMesh(float range)
+    {
+        Vector3 randomDirection = Random.insideUnitSphere * range + transform.position;
+
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(randomDirection, out hit, range, NavMesh.AllAreas))
+            return hit.position;
+
+        return transform.position;
+    }
+
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, viewDistance);
-
-        Vector3 left = Quaternion.Euler(0, -viewAngle / 2f, 0) * transform.forward;
-        Vector3 right = Quaternion.Euler(0, viewAngle / 2f, 0) * transform.forward;
-
-        Gizmos.color = Color.green;
-        Gizmos.DrawLine(transform.position, transform.position + left * viewDistance);
-        Gizmos.DrawLine(transform.position, transform.position + right * viewDistance);
-    }
-
-    public void Investigate(Vector3 alertPosition)
-    {
-        lastSeenPosition = alertPosition;
-        searchTimer = 0f;
-        PickNewSearchPoint();
-        currentState = State.Search;
-        UpdateVisionColor(alertColor);
     }
 }

@@ -121,6 +121,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slowAmount: 0.6
   zoneMusic: {fileID: 8300000, guid: 281e4ed5db212d44d93d881e5ffca376, type: 3}
+  zoneImage: {fileID: 0}
+  zoneSprite: {fileID: -1746347648, guid: 13e6a144c79c1dd42b6c4ae4ac960827, type: 3}
+  fadeSpeed: 3
+  sparklePrefab: {fileID: 0}
+  sparkleCount: 1
+  sparkleSpawnRadius: 2
+  sparkleSpeedMin: 0.1
+  sparkleSpeedMax: 0.5
+  sparkleLifetime: 0.5
 --- !u!1 &3246273694347512331
 GameObject:
   m_ObjectHideFlags: 0

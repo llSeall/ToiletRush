@@ -394,6 +394,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 5518c0568fea9f5499182eb3e20af7dd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5454009242531547165}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 5518c0568fea9f5499182eb3e20af7dd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3778046714813361951}
   m_SourcePrefab: {fileID: 100100000, guid: 5518c0568fea9f5499182eb3e20af7dd, type: 3}
 --- !u!4 &2527135845119101155 stripped
 Transform:
@@ -468,20 +471,17 @@ MonoBehaviour:
   waypoints:
   - {fileID: 380421032905350222}
   - {fileID: 344565322205414382}
-  patrolSpeed: 2
+  patrolRadius: 6
   waitAtPoint: 0.5
-  chaseSpeed: 4
+  waypointBias: 0.6
   catchDistance: 1.2
   searchDuration: 5
   searchRadius: 2
-  searchSpeed: 2.5
   viewDistance: 15.7
   viewAngle: 73
-  obstacleMask:
-    serializedVersion: 2
-    m_Bits: 64
+  visionObject: {fileID: 3807406914003759518}
   alertVFXPrefab: {fileID: 0}
-  shoutWavePrefab: {fileID: 0}
+  shoutWavePrefab: {fileID: 1984316826001180232, guid: 98bc167bc60736b4f975b284ffd9d382, type: 3}
   gameOverCanvas: {fileID: 0}
   visionRenderer: {fileID: 204380676837771617}
   normalColor: {r: 0, g: 0.8595505, b: 1, a: 1}
@@ -489,7 +489,7 @@ MonoBehaviour:
   gameOverImage: {fileID: 0}
   gameOverSprite: {fileID: 0}
   alertLoopSound: {fileID: 8300000, guid: 330f6f56c5c9ad44998ea7f3ba1d1c56, type: 3}
-  idleDuration: 1.2
+  loseSightDelay: 2
 --- !u!136 &5454009242531547165
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -513,3 +513,25 @@ CapsuleCollider:
   m_Height: 0.13
   m_Direction: 1
   m_Center: {x: 0, y: 0.06, z: 0}
+--- !u!195 &3778046714813361951
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2907601350580458073}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4

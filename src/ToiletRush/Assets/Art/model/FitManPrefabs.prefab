@@ -322,7 +322,7 @@ MonoBehaviour:
   staminaReduceAmount: 10
   knockbackForce: 20
   hitCooldown: 5
-  hitVFX: {fileID: 8091181342197485109, guid: f872345c03dd4e94bbc15927b2daf41b, type: 3}
+  hitVFX: {fileID: 6654368151478412265, guid: 8fb7077513cf0684598a61d7cdfefe5e, type: 3}
   hitSound: {fileID: 8300000, guid: ae0eb23ef76cd2541a134350148be710, type: 3}
 --- !u!114 &6005506153679705081
 MonoBehaviour:

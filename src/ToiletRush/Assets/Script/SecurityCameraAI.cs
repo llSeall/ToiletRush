@@ -44,7 +44,7 @@ public class SecurityCameraAI : MonoBehaviour
 
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
         currentAngle = -rotateAngle;
 
         if (rotator != null)
@@ -52,7 +52,6 @@ public class SecurityCameraAI : MonoBehaviour
 
         UpdateVisionColor(normalColor);
 
-        // กันลืมใส่ AudioSource
         if (audioSource == null)
             audioSource = GetComponent<AudioSource>();
     }
@@ -86,34 +85,54 @@ public class SecurityCameraAI : MonoBehaviour
         if (!canAlert || isDisabled || rotator == null || player == null)
             return;
 
-        Vector3 origin = rotator.position + Vector3.up * 0.5f;
-        Vector3 target = player.position + Vector3.up * 0.5f;
+        // ---------- ORIGIN ----------
+        Vector3 origin = rotator.position
+                       + rotator.forward * 0.6f
+                       + Vector3.down * 0.2f; // กดลงเล็กน้อยให้เหมาะกับกล้องสูง
 
-        Vector3 dirToPlayer = (target - origin).normalized;
-        float distance = Vector3.Distance(origin, target);
-
-        if (distance > viewDistance)
-            return;
-
-        float angle = Vector3.Angle(rotator.forward, dirToPlayer);
-        if (angle > viewAngle * 0.5f)
-            return;
-
-        RaycastHit hit;
-
-        if (Physics.Raycast(
-            origin,
-            dirToPlayer,
-            out hit,
-            distance,
-            ~0,
-            QueryTriggerInteraction.Ignore
-        ))
+        // ---------- TARGET POINTS (หลายจุด) ----------
+        Vector3[] targets = new Vector3[]
         {
-            if (hit.transform.CompareTag("Player"))
+        player.position + Vector3.up * 1.6f, // หัว
+        player.position + Vector3.up * 1.0f, // ลำตัว
+        player.position + Vector3.up * 0.3f  // ขา
+        };
+
+        foreach (var target in targets)
+        {
+            Vector3 dir = (target - origin).normalized;
+            float distance = Vector3.Distance(origin, target);
+
+            if (distance > viewDistance)
+                continue;
+
+            // ---------- ANGLE (ignore Y) ----------
+            Vector3 flatForward = new Vector3(rotator.forward.x, 0, rotator.forward.z);
+            Vector3 flatDir = new Vector3(dir.x, 0, dir.z);
+
+            float angle = Vector3.Angle(flatForward, flatDir);
+            if (angle > viewAngle * 0.5f)
+                continue;
+
+            // ---------- SPHERECAST ----------
+            if (Physics.SphereCast(
+                origin,
+                0.3f, // ความกว้างการมอง (ปรับได้)
+                dir,
+                out RaycastHit hit,
+                distance,
+                obstacleMask,
+                QueryTriggerInteraction.Ignore
+            ))
             {
-                AlertNearestGuard();
+                if (hit.transform.root.CompareTag("Player"))
+                {
+                    AlertNearestGuard();
+                    return;
+                }
             }
+
+            Debug.DrawRay(origin, dir * distance, Color.red);
         }
     }
 
@@ -124,8 +143,6 @@ public class SecurityCameraAI : MonoBehaviour
 
         UpdateVisionColor(alertColor);
         ShowAlertUI();
-
-        //  เล่นเสียงตอนจับได้
         PlayAlertSound();
 
         GuardAI[] guards = FindObjectsOfType<GuardAI>();
@@ -153,7 +170,7 @@ public class SecurityCameraAI : MonoBehaviour
         if (audioSource == null || alertSound == null)
             return;
 
-        audioSource.Stop(); // กันเสียงซ้อน
+        audioSource.Stop();
         audioSource.PlayOneShot(alertSound);
     }
 
@@ -210,12 +227,16 @@ public class SecurityCameraAI : MonoBehaviour
     // ---------- DEBUG ----------
     void OnDrawGizmosSelected()
     {
+        if (rotator == null) return;
+
         Gizmos.color = Color.green;
 
-        Vector3 left = Quaternion.Euler(0, -viewAngle / 2f, 0) * transform.forward;
-        Vector3 right = Quaternion.Euler(0, viewAngle / 2f, 0) * transform.forward;
+        Vector3 origin = rotator.position + Vector3.up * 0.5f;
 
-        Gizmos.DrawRay(transform.position, left * viewDistance);
-        Gizmos.DrawRay(transform.position, right * viewDistance);
+        Vector3 left = Quaternion.Euler(0, -viewAngle / 2f, 0) * rotator.forward;
+        Vector3 right = Quaternion.Euler(0, viewAngle / 2f, 0) * rotator.forward;
+
+        Gizmos.DrawRay(origin, left * viewDistance);
+        Gizmos.DrawRay(origin, right * viewDistance);
     }
 }

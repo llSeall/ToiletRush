@@ -48,7 +48,6 @@ public class DialogueSystem : MonoBehaviour
         Time.timeScale = 0f;
 
         dialoguePanel.SetActive(true);
-        portraitImage.sprite = portrait;
 
         sentences.Clear();
         foreach (string line in lines)

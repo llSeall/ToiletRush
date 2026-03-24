@@ -102,5 +102,8 @@ public class TalkQTEUI : MonoBehaviour
 
         npc.OnQTESuccess();
     }
-
+    public void StopQTE()
+{
+    gameObject.SetActive(false);
+}
 }
