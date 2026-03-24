@@ -12,8 +12,13 @@ public class NPCPatrolReduceStamina : MonoBehaviour
     public float staminaReduceAmount = 10f;
     public float knockbackForce = 6f;
     public float hitCooldown = 5f;
+
     [Header("VFX")]
     public GameObject hitVFX;
+
+    [Header("Sound")]
+    public AudioClip hitSound;   //  เสียงตอนชน
+
     private CharacterController controller;
     private int index;
     private int dir = 1;
@@ -68,15 +73,16 @@ public class NPCPatrolReduceStamina : MonoBehaviour
         controller.Move(moveDir.normalized * moveSpeed * Time.deltaTime);
 
         if (moveDir != Vector3.zero)
+        {
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
                 Quaternion.LookRotation(moveDir),
                 Time.deltaTime * 5f
             );
+        }
     }
 
     // ---------- HIT PLAYER ----------
-    // เรียกจาก Trigger
     public void OnHitPlayer(Collider other)
     {
         if (!canHit) return;
@@ -86,18 +92,27 @@ public class NPCPatrolReduceStamina : MonoBehaviour
 
         if (player == null || stamina == null) return;
 
-        // spawn explosion effect
+        //  เล่นเสียง (ไม่โดนตัด)
+        if (hitSound != null)
+        {
+            AudioSource.PlayClipAtPoint(hitSound, other.transform.position);
+        }
+
+        //  VFX
         if (hitVFX != null)
         {
             Instantiate(hitVFX, other.transform.position, Quaternion.identity);
         }
 
+        //  ลด stamina
         stamina.ReduceStamina(staminaReduceAmount);
 
+        //  knockback
         Vector3 dir = (other.transform.position - transform.position).normalized;
         dir.y = 0;
         player.AddKnockback(dir * knockbackForce);
 
+        //  cooldown กันตีรัว
         canHit = false;
         Invoke(nameof(ResetHit), hitCooldown);
 

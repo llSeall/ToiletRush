@@ -2625,6 +2625,7 @@ GameObject:
   - component: {fileID: 1673149801}
   - component: {fileID: 1673149800}
   - component: {fileID: 1673149803}
+  - component: {fileID: 1673149804}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -2695,6 +2696,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelIndex: 0
+--- !u!114 &1673149804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1673149799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ab4842e5f205d041a9803e463a80b5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clickSound: {fileID: 8300000, guid: 2d58d8c6244fe064595a70c7e3ed8c78, type: 3}
+  hoverSound: {fileID: 8300000, guid: 25f491e30f9c9a04fa801c946a4a0d75, type: 3}
+  hoverCooldown: 0.05
 --- !u!1 &1716292317
 GameObject:
   m_ObjectHideFlags: 0

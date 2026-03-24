@@ -63,6 +63,8 @@ public class PauseManager : MonoBehaviour
     public void PauseGame()
     {
         pausePanel.SetActive(true);
+        AudioListener.pause = true;
+
         StartCoroutine(BlurTransition(20f));
         if (escImagePanel != null)
             escImagePanel.SetActive(true);
@@ -77,6 +79,8 @@ public class PauseManager : MonoBehaviour
     public void ResumeGame()
     {
         pausePanel.SetActive(false);
+        AudioListener.pause = false;
+
         StartCoroutine(BlurTransition(0f));
         if (escImagePanel != null)
             escImagePanel.SetActive(false);

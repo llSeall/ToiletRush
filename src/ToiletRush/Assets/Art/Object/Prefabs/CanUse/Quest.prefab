@@ -123,6 +123,7 @@ MonoBehaviour:
   quest: {fileID: 3598936874763604054}
   useImageEffect: 0
   imgEffect: {fileID: 0}
+  questCompleteSound: {fileID: 8300000, guid: c964be9c91226e947bd69bc4f0aeec47, type: 3}
 --- !u!1 &1633205762012406306
 GameObject:
   m_ObjectHideFlags: 0
@@ -344,6 +345,7 @@ MonoBehaviour:
   quest: {fileID: 3598936874763604054}
   useImageEffect: 0
   imgEffect: {fileID: 0}
+  questCompleteSound: {fileID: 8300000, guid: c964be9c91226e947bd69bc4f0aeec47, type: 3}
 --- !u!1 &6867614063901473114
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,6 +618,7 @@ MonoBehaviour:
   quest: {fileID: 7009466334285792181}
   useImageEffect: 0
   imgEffect: {fileID: 0}
+  questCompleteSound: {fileID: 8300000, guid: c964be9c91226e947bd69bc4f0aeec47, type: 3}
 --- !u!114 &7009466334285792181
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -631,6 +634,10 @@ MonoBehaviour:
   questName: 02
   playerAnimator: {fileID: 0}
   qteSystem: {fileID: 0}
+  startMiniGameTrigger: {fileID: 0}
+  miniGameDeliverTrigger: {fileID: 0}
+  requireDeliveryAfterMiniGame: 0
+  miniGameCompleted: 0
 --- !u!1 &8424149604557299139
 GameObject:
   m_ObjectHideFlags: 0

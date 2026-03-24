@@ -12,6 +12,12 @@ public class LockedSwingDoor : MonoBehaviour
     [Header("UI")]
     public GameObject needKeyUI;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip popClip;       // UI pop
+    public AudioClip lockedClip;    //  เสียงล็อค
+    public AudioClip unlockClip;    //  ปลดล็อค
+
     [Header("Open Setting")]
     public float openAngle = 90f;
     public float openSpeed = 3f;
@@ -19,8 +25,11 @@ public class LockedSwingDoor : MonoBehaviour
 
     private bool isOpening;
     private bool isOpen;
+    private bool hasUnlocked = false;
 
     private Quaternion openRot;
+
+    private bool hasShownUI = false;
 
     void Start()
     {
@@ -55,6 +64,7 @@ public class LockedSwingDoor : MonoBehaviour
                 blockCollider.enabled = false;
         }
     }
+
     void OnTriggerStay(Collider other)
     {
         if (isOpen || isOpening) return;
@@ -65,20 +75,66 @@ public class LockedSwingDoor : MonoBehaviour
 
         if (inventory == null) return;
 
-        // ไม่มีกุญแจ
+        //  ไม่มี key
         if (!inventory.HasKey(requiredKeyID))
         {
-            Debug.Log("Door locked, need key: " + requiredKeyID);
-
             if (needKeyUI != null)
                 needKeyUI.SetActive(true);
+
+            if (!hasShownUI)
+            {
+                PlayLockedFeedback(); //  เล่นพร้อมกัน
+                hasShownUI = true;
+            }
 
             return;
         }
 
-        // มีกุญแจ เปิดประตู
-        Debug.Log("Key accepted, opening door");
+        //  มี key
+        if (!hasUnlocked)
+        {
+            PlayUnlockSound();
+            hasUnlocked = true;
+        }
+
         isOpening = true;
     }
 
+    void OnTriggerExit(Collider other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        hasShownUI = false;
+
+        if (needKeyUI != null)
+            needKeyUI.SetActive(false);
+    }
+
+    //  pop + locked พร้อมกัน
+    void PlayLockedFeedback()
+    {
+        if (audioSource == null) return;
+
+        if (popClip != null)
+        {
+            audioSource.pitch = Random.Range(0.95f, 1.05f);
+            audioSource.PlayOneShot(popClip);
+        }
+
+        if (lockedClip != null)
+        {
+            audioSource.pitch = Random.Range(0.9f, 1f);
+            audioSource.PlayOneShot(lockedClip);
+        }
+    }
+
+    //  unlock
+    void PlayUnlockSound()
+    {
+        if (audioSource != null && unlockClip != null)
+        {
+            audioSource.pitch = 1f;
+            audioSource.PlayOneShot(unlockClip);
+        }
+    }
 }

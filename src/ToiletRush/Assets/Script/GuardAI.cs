@@ -45,6 +45,10 @@ public class GuardAI : MonoBehaviour
     public UnityEngine.UI.Image gameOverImage;
     public Sprite gameOverSprite;
 
+    [Header("Alert Sound")]
+    public AudioClip alertLoopSound;
+    private AudioSource alertAudio;
+
     [Header("Idle")]
     public float idleDuration = 1.2f;
 
@@ -73,6 +77,13 @@ public class GuardAI : MonoBehaviour
 
         transform.position = waypoints[0].position;
         UpdateVisionColor(normalColor);
+
+        //  setup audio
+        alertAudio = gameObject.AddComponent<AudioSource>();
+        alertAudio.clip = alertLoopSound;
+        alertAudio.loop = true;
+        alertAudio.playOnAwake = false;
+        alertAudio.spatialBlend = 1f; // 3D sound
     }
 
     void Update()
@@ -175,9 +186,16 @@ public class GuardAI : MonoBehaviour
 
                     ShowAlertVFX();
                     SpawnShoutWave();
+
+                    //  เริ่มเสียงเตือน
+                    if (alertLoopSound != null && !alertAudio.isPlaying)
+                    {
+                        alertAudio.Play();
+                    }
                 }
             }
         }
+        
     }
 
     void OnTriggerEnter(Collider other)
@@ -219,6 +237,12 @@ public class GuardAI : MonoBehaviour
 
             HideAlertVFX();
             RemoveShoutWave();
+
+            //  หยุดเสียงเตือน
+            if (alertAudio.isPlaying)
+            {
+                alertAudio.Stop();
+            }
         }
         UpdateShoutWavePosition();
         UpdateAnimation(chaseSpeed);
@@ -306,7 +330,10 @@ public class GuardAI : MonoBehaviour
     {
         HideAlertVFX();
         RemoveShoutWave();
-
+        if (alertAudio != null && alertAudio.isPlaying)
+        {
+            alertAudio.Stop();
+        }
         Debug.Log("PLAYER CAUGHT!");
 
         if (gameOverCanvas != null)

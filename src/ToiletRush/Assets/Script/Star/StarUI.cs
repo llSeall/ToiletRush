@@ -13,10 +13,18 @@ public class StarUI : MonoBehaviour
     public float delayBetweenStars = 0.2f;
     public float overshootMultiplier = 1.15f;
 
+    [Header("Sound")]
+    public AudioClip starPopSound;   //  เสียงตอนดาวเด้ง
+    private AudioSource audioSource;
+
     private Vector3[] originalScales;
 
     void Awake()
     {
+        //  setup audio
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+
         // จำขนาดตั้งต้นของแต่ละดวง
         originalScales = new Vector3[stars.Length];
         for (int i = 0; i < stars.Length; i++)
@@ -50,6 +58,14 @@ public class StarUI : MonoBehaviour
             if (i < count)
             {
                 stars[i].sprite = starOn;
+
+                //  เล่นเสียงตอนดาวกำลังเด้ง
+                if (starPopSound != null)
+                {
+                    audioSource.pitch = 1f + (i * 0.1f); // เสียงสูงขึ้นตามลำดับ
+                    audioSource.PlayOneShot(starPopSound);
+                }
+
                 yield return StartCoroutine(PopStar(stars[i], originalScales[i]));
                 yield return new WaitForSecondsRealtime(delayBetweenStars);
             }
@@ -81,7 +97,6 @@ public class StarUI : MonoBehaviour
             yield return null;
         }
 
-        // จบที่ขนาดจริง
         star.transform.localScale = targetScale;
         cg.alpha = 1f;
     }

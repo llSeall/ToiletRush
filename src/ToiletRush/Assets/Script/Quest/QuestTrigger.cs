@@ -17,6 +17,9 @@ public class QuestTrigger : MonoBehaviour
     public bool useImageEffect = false;
     public ImgTriggerEffect imgEffect;
 
+    [Header("Sound")]
+    public AudioClip questCompleteSound; //  เสียงตอนเควสสำเร็จ
+
     private void Start()
     {
         if (quest != null)
@@ -37,6 +40,12 @@ public class QuestTrigger : MonoBehaviour
 
     private void OnQuestCompleted()
     {
+        //  เล่นเสียง (ไม่โดนตัด)
+        if (questCompleteSound != null)
+        {
+            AudioSource.PlayClipAtPoint(questCompleteSound, transform.position);
+        }
+
         if (triggerType == TriggerType.Deliver ||
             triggerType == TriggerType.MiniGameDeliver)
         {
@@ -74,7 +83,6 @@ public class QuestTrigger : MonoBehaviour
             case TriggerType.MiniGameDeliver:
                 if (quest is MiniGameQuest miniGameQuest2)
                 {
-                    //  กันกดก่อนมินิเกมจบ
                     if (!miniGameQuest2.miniGameCompleted)
                     {
                         Debug.Log("MiniGame not finished!");

@@ -15,6 +15,13 @@ public class StartLevelUI : MonoBehaviour
     public Sprite[] countdownSprites;
     public float countdownInterval = 1f;
 
+    [Header("Sound - Countdown")]
+    public AudioClip[] countdownSounds; // 3 2 1
+    private AudioSource countdownAudio;
+
+    [Header("Sound - BGM")]
+    public AudioSource bgmSource; //  เพลงหลัก
+
     [Header("Input")]
     public KeyCode closeKey = KeyCode.Space;
 
@@ -28,6 +35,16 @@ public class StartLevelUI : MonoBehaviour
 
     void Start()
     {
+        //  สร้าง AudioSource สำหรับ countdown
+        countdownAudio = gameObject.AddComponent<AudioSource>();
+        countdownAudio.playOnAwake = false;
+
+        //  หยุด BGM ไว้ก่อน
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
+
         ShowStartUI();
     }
 
@@ -35,13 +52,12 @@ public class StartLevelUI : MonoBehaviour
     {
         if (!isShowingStart) return;
 
-        // กด Spacebar
         if (Input.GetKeyDown(closeKey))
         {
             StartGame();
         }
 
-        // Animation ปุ่มเด้ง
+        //  ปุ่มเด้ง
         if (pressButton != null)
         {
             float scale = 1 + Mathf.Sin(Time.unscaledTime * pressAnimSpeed) * (pressScale - 1);
@@ -62,7 +78,6 @@ public class StartLevelUI : MonoBehaviour
         isShowingStart = true;
     }
 
-    // ฟังก์ชันนี้ให้ UI Button เรียก
     public void StartGame()
     {
         if (!isShowingStart || isCountingDown) return;
@@ -81,7 +96,15 @@ public class StartLevelUI : MonoBehaviour
 
         for (int i = 0; i < countdownSprites.Length; i++)
         {
+            //  เปลี่ยนภาพ
             countdownImage.sprite = countdownSprites[i];
+
+            //  เล่นเสียงตามจังหวะ
+            if (countdownSounds != null && i < countdownSounds.Length && countdownSounds[i] != null)
+            {
+                countdownAudio.pitch = 1f + (i * 0.1f); // เสียงสูงขึ้นนิดนึง
+                countdownAudio.PlayOneShot(countdownSounds[i]);
+            }
 
             yield return StartCoroutine(PopAnimation());
             yield return new WaitForSecondsRealtime(countdownInterval);
@@ -89,7 +112,15 @@ public class StartLevelUI : MonoBehaviour
 
         countdownObject.SetActive(false);
 
+        //  เริ่มเกมจริง
         Time.timeScale = 1f;
+
+        //  เปิด BGM ตอนนับเสร็จ
+        if (bgmSource != null)
+        {
+            bgmSource.Play();
+        }
+
         isCountingDown = false;
     }
 
