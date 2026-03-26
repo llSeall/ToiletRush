@@ -14,9 +14,6 @@ public class PhotoNPCQTE : MonoBehaviour
     public MonoBehaviour playerMovementScript;
     public Animator playerAnimator;
 
-    [Header("Game Over Image")]
-    public UnityEngine.UI.Image gameOverImage;
-    public Sprite gameOverSprite;
 
     [Header("Animation Parameter")]
     public string poseTriggerName = "Pose";
@@ -68,9 +65,6 @@ public class PhotoNPCQTE : MonoBehaviour
 
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
-
-        if (gameOverImage != null && gameOverSprite != null)
-            gameOverImage.sprite = gameOverSprite;
 
         Time.timeScale = 0f;
         enabled = false;

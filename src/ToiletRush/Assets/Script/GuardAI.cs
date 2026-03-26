@@ -7,11 +7,9 @@ public class GuardAI : MonoBehaviour
     public enum State { Patrol, Chase, Search, Return }
     public State currentState = State.Patrol;
 
-    [Header("Patrol (Smart Random)")]
+    [Header("Patrol")]
     public Transform[] waypoints;
-    public float patrolRadius = 6f;
     public float waitAtPoint = 1f;
-    [Range(0, 1)] public float waypointBias = 0.6f;
 
     [Header("Chase")]
     public float catchDistance = 1.2f;
@@ -23,9 +21,10 @@ public class GuardAI : MonoBehaviour
     [Header("Vision")]
     public float viewDistance = 6f;
     [Range(0, 180)] public float viewAngle = 60f;
-
+    Vector3 currentSearchTarget;
+    bool hasSearchTarget = false;
     [Header("Vision Visual")]
-    public GameObject visionObject; //  เพิ่มตัวนี้
+    public GameObject visionObject;
 
     [Header("Alert VFX")]
     public GameObject alertVFXPrefab;
@@ -43,9 +42,6 @@ public class GuardAI : MonoBehaviour
     public Color normalColor = Color.yellow;
     public Color alertColor = Color.red;
 
-    [Header("Game Over Image")]
-    public UnityEngine.UI.Image gameOverImage;
-    public Sprite gameOverSprite;
 
     [Header("Alert Sound")]
     public AudioClip alertLoopSound;
@@ -55,13 +51,23 @@ public class GuardAI : MonoBehaviour
     private Transform player;
     private Animator animator;
 
-    private float waitTimer;
-    private Vector3 lastSeenPosition;
-    private float searchTimer;
+    private int currentWaypointIndex = 0;
+    private int waypointDirection = 1;
+    private int lastWaypointIndex = 0;
 
-    //  ใหม่ delay การมองหาย
-    private float loseSightTimer = 0f;
+    private float waitTimer;
+    private float searchTimer;
+    private float loseSightTimer;
+
     public float loseSightDelay = 2f;
+
+    private Vector3 lastSeenPosition;
+    private Vector3 chaseTarget;
+
+    private float repathTimer = 0f;
+    private float repathRate = 0.2f;
+
+    float stuckTimer = 0f;
 
     void Start()
     {
@@ -69,17 +75,11 @@ public class GuardAI : MonoBehaviour
         animator = GetComponent<Animator>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
-        UpdateVisionColor(normalColor);
-
         agent.speed = 4.5f;
-        agent.angularSpeed = 180f;
-        agent.acceleration = 8f;
-        agent.autoBraking = false;
-        agent.stoppingDistance = 0f;
-        agent.acceleration = 20f;
         agent.angularSpeed = 300f;
+        agent.acceleration = 50f;
         agent.stoppingDistance = 0f;
-
+        agent.autoBraking = false;
 
         alertAudio = gameObject.AddComponent<AudioSource>();
         alertAudio.clip = alertLoopSound;
@@ -87,7 +87,10 @@ public class GuardAI : MonoBehaviour
         alertAudio.playOnAwake = false;
         alertAudio.spatialBlend = 1f;
 
-        PickNextPatrolPoint();
+        UpdateVisionColor(normalColor);
+
+        if (waypoints.Length > 0)
+            agent.SetDestination(waypoints[currentWaypointIndex].position);
     }
 
     void Update()
@@ -113,44 +116,50 @@ public class GuardAI : MonoBehaviour
                 break;
         }
 
+        // กัน path พังระหว่าง Chase
+        if (currentState == State.Chase)
+        {
+            if (agent.pathStatus == NavMeshPathStatus.PathPartial ||
+                agent.pathStatus == NavMeshPathStatus.PathInvalid)
+            {
+                ForceReturnToPatrol();
+            }
+        }
+
+        CheckStuck();
         UpdateAnimation(agent.velocity.magnitude);
     }
 
     // ---------- PATROL ----------
     void Patrol()
     {
-        if (agent.pathPending) return;
+        if (waypoints.Length == 0) return;
 
-        if (agent.remainingDistance < 0.4f)
+        if (agent.remainingDistance < 0.3f)
         {
             waitTimer += Time.deltaTime;
 
             if (waitTimer >= waitAtPoint)
             {
-                PickNextPatrolPoint();
+                lastWaypointIndex = currentWaypointIndex;
+
+                currentWaypointIndex += waypointDirection;
+
+                if (currentWaypointIndex >= waypoints.Length)
+                {
+                    currentWaypointIndex = waypoints.Length - 2;
+                    waypointDirection = -1;
+                }
+                else if (currentWaypointIndex < 0)
+                {
+                    currentWaypointIndex = 1;
+                    waypointDirection = 1;
+                }
+
+                agent.SetDestination(waypoints[currentWaypointIndex].position);
                 waitTimer = 0f;
             }
         }
-    }
-
-    void PickNextPatrolPoint()
-    {
-        Vector3 target;
-
-        if (waypoints.Length > 0 && Random.value < 0.5f)
-        {
-            target = waypoints[Random.Range(0, waypoints.Length)].position;
-        }
-        else
-        {
-            do
-            {
-                target = GetRandomPointOnNavMesh(50f);
-            }
-            while (Vector3.Distance(transform.position, target) < 5f);
-        }
-
-        agent.SetDestination(target);
     }
 
     // ---------- VISION ----------
@@ -168,22 +177,20 @@ public class GuardAI : MonoBehaviour
         if (angle > viewAngle * 0.5f) return;
 
         RaycastHit hit;
-
-        //  สำคัญ: ไม่ใช้ obstacleMask แล้ว
         int mask = ~LayerMask.GetMask("Ignore Raycast");
 
-        if (Physics.Raycast(origin, dir, out hit, dist, mask, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(origin, dir, out hit, dist, mask))
         {
             if (hit.transform.root.CompareTag("Player"))
             {
-                currentState = State.Chase;
-                UpdateVisionColor(alertColor);
+                ChangeState(State.Chase);
 
+                UpdateVisionColor(alertColor);
                 ShowAlertVFX();
                 SpawnShoutWave();
 
                 if (visionObject != null)
-                    visionObject.SetActive(false); // ปิด cone
+                    visionObject.SetActive(false);
 
                 if (!alertAudio.isPlaying)
                     alertAudio.Play();
@@ -194,12 +201,37 @@ public class GuardAI : MonoBehaviour
     // ---------- CHASE ----------
     void ChasePlayer()
     {
-        agent.SetDestination(player.position);
-        agent.speed = 4.5f;
+        repathTimer += Time.deltaTime;
 
-        float dist = Vector3.Distance(transform.position, player.position);
+        if (repathTimer >= repathRate)
+        {
+            repathTimer = 0f;
+
+            NavMeshHit hit;
+
+            if (NavMesh.SamplePosition(player.position, out hit, 2f, NavMesh.AllAreas))
+            {
+                if (CanReach(hit.position))
+                {
+                    chaseTarget = hit.position;
+                    agent.SetDestination(chaseTarget);
+                }
+                else
+                {
+                    ForceReturnToPatrol();
+                    return;
+                }
+            }
+            else
+            {
+                ForceReturnToPatrol();
+                return;
+            }
+        }
 
         UpdateShoutWavePosition();
+
+        float dist = Vector3.Distance(transform.position, chaseTarget);
 
         if (dist <= catchDistance)
         {
@@ -207,21 +239,19 @@ public class GuardAI : MonoBehaviour
             return;
         }
 
-        //  ระบบ delay การมองหาย
         if (dist > viewDistance)
         {
             loseSightTimer += Time.deltaTime;
 
             if (loseSightTimer >= loseSightDelay)
             {
-                lastSeenPosition = player.position;
-                searchTimer = 0f;
+                lastSeenPosition = chaseTarget;
 
-                currentState = State.Search;
+                ChangeState(State.Search);
                 UpdateVisionColor(normalColor);
 
                 if (visionObject != null)
-                    visionObject.SetActive(true); //  เปิด cone กลับ
+                    visionObject.SetActive(true);
 
                 HideAlertVFX();
                 RemoveShoutWave();
@@ -239,38 +269,101 @@ public class GuardAI : MonoBehaviour
     // ---------- SEARCH ----------
     void SearchArea()
     {
-        agent.SetDestination(lastSeenPosition);
+        if (!CanReach(lastSeenPosition))
+        {
+            ForceReturnToPatrol();
+            return;
+        }
 
+        // ถ้ายังไม่มี target  สร้างใหม่
+        if (!hasSearchTarget)
+        {
+            Vector3 randomPoint = lastSeenPosition + Random.insideUnitSphere * searchRadius;
+            randomPoint.y = transform.position.y;
+
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(randomPoint, out hit, searchRadius, NavMesh.AllAreas))
+            {
+                currentSearchTarget = hit.position;
+                agent.SetDestination(currentSearchTarget);
+                hasSearchTarget = true;
+            }
+        }
+
+        // ถ้าเดินถึงจุดแล้ว
         if (!agent.pathPending && agent.remainingDistance < 0.5f)
         {
-            searchTimer += Time.deltaTime;
+            hasSearchTarget = false; // ไปหาจุดใหม่รอบหน้า
+        }
 
-            if (searchTimer >= searchDuration)
-            {
-                currentState = State.Return;
-            }
+        searchTimer += Time.deltaTime;
+
+        if (searchTimer >= searchDuration)
+        {
+            hasSearchTarget = false;
+            ChangeState(State.Return);
         }
     }
 
     // ---------- RETURN ----------
     void ReturnToPatrol()
     {
-        PickNextPatrolPoint();
-        currentState = State.Patrol;
+        if (waypoints.Length == 0) return;
 
-        if (visionObject != null)
-            visionObject.SetActive(true);
+        agent.SetDestination(waypoints[lastWaypointIndex].position);
+
+        if (agent.remainingDistance < 0.3f)
+        {
+            currentWaypointIndex = lastWaypointIndex;
+            ChangeState(State.Patrol);
+
+            if (visionObject != null)
+                visionObject.SetActive(true);
+
+            UpdateVisionColor(normalColor);
+        }
     }
 
     // ---------- INVESTIGATE ----------
     public void Investigate(Vector3 alertPosition)
     {
-        lastSeenPosition = alertPosition;
-        currentState = State.Search;
-        searchTimer = 0f;
+        NavMeshHit hit;
 
-        agent.SetDestination(alertPosition);
-        UpdateVisionColor(alertColor);
+        if (NavMesh.SamplePosition(alertPosition, out hit, 5f, NavMesh.AllAreas))
+        {
+            if (CanReach(hit.position))
+            {
+                lastSeenPosition = hit.position;
+                agent.SetDestination(hit.position);
+
+                ChangeState(State.Search);
+                UpdateVisionColor(alertColor);
+
+                if (!alertAudio.isPlaying)
+                    alertAudio.Play();
+            }
+        }
+    }
+
+    // ---------- FORCE RETURN ----------
+    void ForceReturnToPatrol()
+    {
+        RemoveShoutWave();
+        HideAlertVFX();
+        alertAudio.Stop();
+
+        agent.ResetPath();
+        ChangeState(State.Return);
+    }
+
+    // ---------- STATE ----------
+    void ChangeState(State newState)
+    {
+        currentState = newState;
+        waitTimer = 0f;
+        searchTimer = 0f;
+        loseSightTimer = 0f;
+        hasSearchTarget = false;
     }
 
     // ---------- CATCH ----------
@@ -283,24 +376,9 @@ public class GuardAI : MonoBehaviour
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
 
-        if (gameOverImage != null && gameOverSprite != null)
-            gameOverImage.sprite = gameOverSprite;
 
         Time.timeScale = 0f;
         enabled = false;
-    }
-
-    // ---------- VISUAL ----------
-    void UpdateVisionColor(Color c)
-    {
-        if (visionRenderer != null)
-            visionRenderer.material.color = c;
-    }
-
-    void UpdateAnimation(float speed)
-    {
-        if (animator != null)
-            animator.SetFloat("Speed", speed);
     }
 
     // ---------- VFX ----------
@@ -327,12 +405,17 @@ public class GuardAI : MonoBehaviour
 
     void UpdateShoutWavePosition()
     {
-        if (currentShoutWave == null || player == null) return;
+        if (currentShoutWave == null) return;
 
-        Vector3 mid = Vector3.Lerp(transform.position, player.position, 0.5f);
-        mid.y = transform.position.y + 1.5f;
+        float dist = Vector3.Distance(transform.position, player.position);
 
-        currentShoutWave.transform.position = mid;
+        Vector3 pos = (dist <= viewDistance)
+            ? Vector3.Lerp(transform.position, player.position, 0.5f)
+            : transform.position + transform.forward * 1.5f;
+
+        pos.y = transform.position.y + 1.5f;
+
+        currentShoutWave.transform.position = pos;
     }
 
     void RemoveShoutWave()
@@ -341,15 +424,40 @@ public class GuardAI : MonoBehaviour
             Destroy(currentShoutWave);
     }
 
-    Vector3 GetRandomPointOnNavMesh(float range)
+    // ---------- UTILITY ----------
+    bool CanReach(Vector3 target)
     {
-        Vector3 randomDirection = Random.insideUnitSphere * range + transform.position;
+        NavMeshPath path = new NavMeshPath();
+        return agent.CalculatePath(target, path) && path.status == NavMeshPathStatus.PathComplete;
+    }
 
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(randomDirection, out hit, range, NavMesh.AllAreas))
-            return hit.position;
+    void CheckStuck()
+    {
+        if (agent.velocity.sqrMagnitude < 0.1f)
+        {
+            stuckTimer += Time.deltaTime;
 
-        return transform.position;
+            if (stuckTimer > 2f)
+            {
+                ForceReturnToPatrol();
+            }
+        }
+        else
+        {
+            stuckTimer = 0f;
+        }
+    }
+
+    void UpdateAnimation(float speed)
+    {
+        if (animator != null)
+            animator.SetFloat("Speed", speed);
+    }
+
+    void UpdateVisionColor(Color c)
+    {
+        if (visionRenderer != null)
+            visionRenderer.material.color = c;
     }
 
     void OnDrawGizmosSelected()

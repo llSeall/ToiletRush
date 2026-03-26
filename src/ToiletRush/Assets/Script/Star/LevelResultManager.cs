@@ -5,7 +5,7 @@ public class LevelResultManager : MonoBehaviour
     public static LevelResultManager Instance;
 
     [Header("Stamina Star")]
-    public float staminaStarThreshold = 60f; // ต้องเหลือเท่านี้ถึงได้ดาว
+    public float staminaStarThreshold = 60f;
 
     [Header("Result")]
     public bool collectedSecret = false;
@@ -22,30 +22,36 @@ public class LevelResultManager : MonoBehaviour
         staminaSystem = FindObjectOfType<StaminaSystem>();
     }
 
-    // เรียกเมื่อเก็บของลับ
     public void CollectSecret()
     {
         collectedSecret = true;
     }
 
-    // เรียกตอนชนะด่าน
-    public int CalculateStars()
+    //  ระบบใหม่: คืนค่าเป็น bool[]
+    public bool[] GetStarResults()
     {
-        int stars = 1; // จบด่าน = ได้ 1 ดาว
+        bool[] results = new bool[3];
 
-        if (collectedSecret)
-            stars++;
+        //  ดวงที่ 1: ชนะด่าน (ได้เสมอ)
+        results[0] = true;
 
-        if (staminaSystem != null &&
-            staminaSystem.currentStamina >= staminaStarThreshold)
+        //  ดวงที่ 2: เก็บของลับ
+        results[2] = collectedSecret;
+
+        // ดวงที่ 3: Stamina มากพอ
+        if (staminaSystem != null)
         {
-            stars++;
+            results[1] = staminaSystem.currentStamina >= staminaStarThreshold;
+        }
+        else
+        {
+            results[1] = false;
         }
 
         Debug.Log(
-            $"Stars={stars} | Stamina={staminaSystem.currentStamina}/{staminaStarThreshold}"
+            $"Star1={results[0]} | Star2={results[1]} | Star3={results[2]} | Stamina={staminaSystem?.currentStamina}"
         );
 
-        return stars;
+        return results;
     }
 }

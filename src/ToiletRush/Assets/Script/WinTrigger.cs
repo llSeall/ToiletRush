@@ -37,7 +37,6 @@ public class WinTrigger : MonoBehaviour
             quest.OnQuestCompleted += OnQuestCompleted;
         }
 
-        // กันลืมใส่ AudioSource
         if (audioSource == null)
             audioSource = GetComponent<AudioSource>();
     }
@@ -89,16 +88,22 @@ public class WinTrigger : MonoBehaviour
     {
         alreadyWon = true;
 
-        //  เล่นเสียงตอน "ชนะเท่านั้น"
         PlayWinSound();
 
-        int stars = LevelResultManager.Instance.CalculateStars();
+        // ใช้ระบบใหม่
+        bool[] starResults = LevelResultManager.Instance.GetStarResults();
 
-        SaveManager.SaveStars(levelName, stars);
+        int starCount = 0;
+        foreach (bool s in starResults)
+        {
+            if (s) starCount++;
+        }
+
+        SaveManager.SaveStars(levelName, starCount);
         SaveManager.UnlockLevel(levelName);
 
         winCanvas.SetActive(true);
-        starUI.ShowStars(stars);
+        starUI.ShowStars(starResults);
 
         Time.timeScale = 0f;
     }
@@ -108,7 +113,7 @@ public class WinTrigger : MonoBehaviour
         if (audioSource == null || winSound == null)
             return;
 
-        audioSource.Stop(); // กันเสียงซ้อน
+        audioSource.Stop();
         audioSource.PlayOneShot(winSound);
     }
 }

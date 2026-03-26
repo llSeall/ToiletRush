@@ -142,3 +142,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyID: RedKey
+  pickupSound: {fileID: 8300000, guid: c964be9c91226e947bd69bc4f0aeec47, type: 3}
+  volume: 1

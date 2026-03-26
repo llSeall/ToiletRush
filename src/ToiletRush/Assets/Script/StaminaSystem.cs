@@ -21,9 +21,7 @@ public class StaminaSystem : MonoBehaviour
 
     [Header("Game Over")]
     public GameObject gameOverCanvas;
-    public Image gameOverImage;
-    public Sprite gameOverSprite;
-
+    
     [Header("Post Processing")]
     public Volume volume;
     private Vignette vignette;
@@ -420,9 +418,7 @@ public class StaminaSystem : MonoBehaviour
         if (gameOverCanvas != null)
             gameOverCanvas.SetActive(true);
 
-        if (gameOverImage != null && gameOverSprite != null)
-            gameOverImage.sprite = gameOverSprite;
-
+        
         Time.timeScale = 0f;
         enabled = false;
     }

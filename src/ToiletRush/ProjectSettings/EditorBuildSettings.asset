@@ -24,11 +24,20 @@ EditorBuildSettings:
     path: Assets/Scenes/Level5.unity
     guid: 89b5dd428acf2124b8d8ad5ff987a117
   - enabled: 1
+    path: Assets/Scenes/Saturday.unity
+    guid: dfd253003e6aa534dbe6501378c07411
+  - enabled: 1
+    path: Assets/Scenes/Sunday.unity
+    guid: dbf351a144f211a4c9e608a12b27d9a6
+  - enabled: 1
     path: Assets/Scenes/Level6.unity
     guid: cdcb47459aeecf040b347198f8124f3d
   - enabled: 1
     path: Assets/Scenes/Level7.unity
     guid: 2357a893fe9733a4caf4b1f863b0c6cd
+  - enabled: 1
+    path: Assets/Scenes/Level8.unity
+    guid: b72753da2084f7c46bf323f7b7737b3c
   - enabled: 0
     path: Assets/Scenes/Test.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab

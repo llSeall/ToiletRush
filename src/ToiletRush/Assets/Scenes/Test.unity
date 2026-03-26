@@ -545,8 +545,6 @@ MonoBehaviour:
   staminaSlider: {fileID: 672033770}
   staminaVisualUI: {fileID: 532819741}
   gameOverCanvas: {fileID: 1954510251}
-  gameOverImage: {fileID: 2132309166}
-  gameOverSprite: {fileID: 21300000, guid: adb084a39d61b4145a95105476b3ab01, type: 3}
   volume: {fileID: 0}
   phase2Threshold: 0.4
   phase3Threshold: 0.2
@@ -578,6 +576,10 @@ MonoBehaviour:
     sprite: {fileID: -1524012616, guid: 13e6a144c79c1dd42b6c4ae4ac960827, type: 3}
   - tag: Girl
     sprite: {fileID: -1746347648, guid: 13e6a144c79c1dd42b6c4ae4ac960827, type: 3}
+  sweatParticleInstance: {fileID: 0}
+  sweatSpawnPoint: {fileID: 0}
+  sweatIntervalPhase2: 1.5
+  sweatIntervalPhase3: 0.5
 --- !u!114 &48189790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -600,6 +602,13 @@ MonoBehaviour:
   cameraOffset: {x: 0, y: 15, z: 0}
   cameraLeadDistance: 0
   cameraFollowSmooth: 10
+  zoomKey: 306
+  zoomOutOffset: {x: 0, y: 15, z: -6}
+  zoomSmooth: 5
+  peekDistance: 3
+  peekSpeed: 2
+  dustPrefab: {fileID: 0}
+  dustSpawnInterval: 0.1
 --- !u!143 &48189791
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1326,9 +1335,7 @@ MonoBehaviour:
   waypoints:
   - {fileID: 1307683239}
   - {fileID: 1048424468}
-  patrolRadius: 6
   waitAtPoint: 0.5
-  waypointBias: 0.6
   catchDistance: 1.2
   searchDuration: 5
   searchRadius: 2
@@ -12118,7 +12125,6 @@ RectTransform:
   m_Children:
   - {fileID: 1459601383}
   - {fileID: 1990934591}
-  - {fileID: 2132309164}
   m_Father: {fileID: 742784717}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -12568,96 +12574,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3431569215348201275, guid: 077e64d406c9d7742bdf13ec16c4b9ee, type: 3}
   m_PrefabInstance: {fileID: 8632514638057674535}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &2132309163
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2132309164}
-  - component: {fileID: 2132309167}
-  - component: {fileID: 2132309166}
-  - component: {fileID: 2132309165}
-  m_Layer: 5
-  m_Name: Image
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &2132309164
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2132309163}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1954510252}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 63}
-  m_SizeDelta: {x: 580, y: 580}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2132309165
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2132309163}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b25435bce2d8d7d418f2ae96f67aebd9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  popDuration: 1
-  startScale: 0.3
---- !u!114 &2132309166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2132309163}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &2132309167
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2132309163}
-  m_CullTransparentMesh: 1
 --- !u!4 &2140994656 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4819815985580704187, guid: 203319ab79fb7464fbd9006e68ebc110, type: 3}
@@ -12861,7 +12777,7 @@ PrefabInstance:
     - target: {fileID: 6784499255682086921, guid: aa1d43aab952bde43b15601629fae00c, type: 3}
       propertyPath: gameOverImage
       value: 
-      objectReference: {fileID: 2132309166}
+      objectReference: {fileID: 0}
     - target: {fileID: 6784499255682086921, guid: aa1d43aab952bde43b15601629fae00c, type: 3}
       propertyPath: gameOverCanvas
       value: 
@@ -14054,7 +13970,7 @@ PrefabInstance:
     - target: {fileID: 619890970419067444, guid: 5f25cd463bcc4674ca5b80730d379c8a, type: 3}
       propertyPath: gameOverImage
       value: 
-      objectReference: {fileID: 2132309166}
+      objectReference: {fileID: 0}
     - target: {fileID: 619890970419067444, guid: 5f25cd463bcc4674ca5b80730d379c8a, type: 3}
       propertyPath: alertVFXPrefab
       value: 

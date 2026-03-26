@@ -14,18 +14,16 @@ public class StarUI : MonoBehaviour
     public float overshootMultiplier = 1.15f;
 
     [Header("Sound")]
-    public AudioClip starPopSound;   //  เสียงตอนดาวเด้ง
+    public AudioClip starPopSound;
     private AudioSource audioSource;
 
     private Vector3[] originalScales;
 
     void Awake()
     {
-        //  setup audio
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
 
-        // จำขนาดตั้งต้นของแต่ละดวง
         originalScales = new Vector3[stars.Length];
         for (int i = 0; i < stars.Length; i++)
         {
@@ -33,15 +31,14 @@ public class StarUI : MonoBehaviour
         }
     }
 
-    public void ShowStars(int count)
+    public void ShowStars(bool[] starResults)
     {
         StopAllCoroutines();
-        StartCoroutine(AnimateStars(count));
+        StartCoroutine(AnimateStars(starResults));
     }
 
-    IEnumerator AnimateStars(int count)
+    IEnumerator AnimateStars(bool[] results)
     {
-        // รีเซ็ต
         for (int i = 0; i < stars.Length; i++)
         {
             stars[i].sprite = starOff;
@@ -55,19 +52,17 @@ public class StarUI : MonoBehaviour
 
         for (int i = 0; i < stars.Length; i++)
         {
-            if (i < count)
+            if (i < results.Length && results[i])
             {
                 stars[i].sprite = starOn;
 
-                //  เล่นเสียงตอนดาวกำลังเด้ง
                 if (starPopSound != null)
                 {
-                    audioSource.pitch = 1f + (i * 0.1f); // เสียงสูงขึ้นตามลำดับ
+                    audioSource.pitch = 1f + (i * 0.1f);
                     audioSource.PlayOneShot(starPopSound);
                 }
 
                 yield return StartCoroutine(PopStar(stars[i], originalScales[i]));
-                yield return new WaitForSecondsRealtime(delayBetweenStars);
             }
             else
             {
@@ -75,6 +70,8 @@ public class StarUI : MonoBehaviour
                 stars[i].transform.localScale = originalScales[i];
                 GetCanvasGroup(stars[i]).alpha = 1f;
             }
+
+            yield return new WaitForSecondsRealtime(delayBetweenStars);
         }
     }
 
