@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class KeyPickup : MonoBehaviour
 {
-    public string keyID = "RedKey"; // ตั้งชื่อกุญแจได้
+    public string keyID = "RedKey";
 
     [Header("Sound")]
     public AudioClip pickupSound;
@@ -23,18 +23,22 @@ public class KeyPickup : MonoBehaviour
             inventory.AddKey(keyID);
             Debug.Log("Picked up key: " + keyID);
 
-            //  เล่นเสียง
+            //  สร้างตัวเล่นเสียงแยก
             if (pickupSound != null)
             {
-                AudioSource.PlayClipAtPoint(pickupSound, transform.position, volume);
+                GameObject soundObj = new GameObject("PickupSound");
+                soundObj.transform.position = transform.position;
+
+                AudioSource audioSource = soundObj.AddComponent<AudioSource>();
+                audioSource.clip = pickupSound;
+                audioSource.volume = volume;
+                audioSource.Play();
+
+                Destroy(soundObj, pickupSound.length);
             }
 
-            //  ซ่อน object แทนการลบทันที
-            GetComponent<Collider>().enabled = false;
-            GetComponent<MeshRenderer>().enabled = false;
-
-            //  รอให้เสียงเล่นจบแล้วค่อยลบ
-            Destroy(gameObject, pickupSound != null ? pickupSound.length : 0f);
+            //  ลบทันที (หายไว)
+            Destroy(gameObject);
         }
     }
 }
