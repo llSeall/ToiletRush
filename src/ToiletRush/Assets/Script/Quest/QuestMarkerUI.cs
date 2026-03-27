@@ -156,8 +156,15 @@ public class QuestGPSSystem : MonoBehaviour
         if (quest.distanceText != null)
             quest.distanceText.text = Mathf.RoundToInt(distance) + " m";
 
-        float t = Mathf.InverseLerp(maxDistance, minDistance, distance);
+        // ล็อกระยะไม่ให้เกินขอบเขต
+        float clampedDistance = Mathf.Clamp(distance, minDistance, maxDistance);
+
+        // คำนวณ scale จากระยะที่ถูกล็อกแล้ว
+        float t = Mathf.InverseLerp(maxDistance, minDistance, clampedDistance);
         float scale = Mathf.Lerp(minScale, maxScale, t);
+
+        // กันพลาดอีกชั้น (double safety)
+        scale = Mathf.Clamp(scale, minScale, maxScale);
 
         quest.markerUI.localScale = Vector3.one * scale;
 

@@ -3,45 +3,36 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class ChargerAI : MonoBehaviour
 {
-    public enum AIState { Patrol, Charging, Grab }
+    public enum AIState { Charging, Grab }
 
     [Header("Waypoints")]
     public Transform pointA;
     public Transform pointB;
 
-    [Header("Speed Settings")]
-    public float patrolSpeed = 2f;
+    [Header("Speed")]
     public float chargeSpeed = 8f;
-
-    [Header("Vision")]
-    public Collider visionTrigger;
 
     private CharacterController controller;
     private AIState currentState;
 
-    private Transform currentTarget;
     private Transform chargeTarget;
+    private Vector3 lockedDirection;
 
     private GameObject grabbedPlayer;
     private CharacterController grabbedPlayerController;
 
-    private Vector3 lockedChargeDirection;
-
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        currentTarget = pointA;
-        currentState = AIState.Patrol;
+
+        SetNextTarget();
+        StartCharge();
     }
 
     void Update()
     {
         switch (currentState)
         {
-            case AIState.Patrol:
-                Patrol();
-                break;
-
             case AIState.Charging:
                 Charge();
                 break;
@@ -53,32 +44,27 @@ public class ChargerAI : MonoBehaviour
     }
 
     // =========================
-    // PATROL
+    // เลือกเป้าหมาย A/B
     // =========================
-    void Patrol()
+    void SetNextTarget()
     {
-        MoveTo(currentTarget.position, patrolSpeed);
-
-        if (Vector3.Distance(transform.position, currentTarget.position) < 0.5f)
-        {
-            currentTarget = (currentTarget == pointA) ? pointB : pointA;
-        }
+        if (chargeTarget == null || chargeTarget == pointB)
+            chargeTarget = pointA;
+        else
+            chargeTarget = pointB;
     }
 
     // =========================
-    // START CHARGE
+    // เริ่ม Charge
     // =========================
-    void StartCharge(Transform finalPoint)
+    void StartCharge()
     {
         currentState = AIState.Charging;
 
-        chargeTarget = finalPoint;
-
-        // ล็อคทิศทางตอนเริ่มชาร์จ
-        lockedChargeDirection =
+        lockedDirection =
             (chargeTarget.position - transform.position).normalized;
 
-        transform.forward = lockedChargeDirection;
+        transform.forward = lockedDirection;
     }
 
     // =========================
@@ -86,12 +72,12 @@ public class ChargerAI : MonoBehaviour
     // =========================
     void Charge()
     {
-        controller.Move(lockedChargeDirection * chargeSpeed * Time.deltaTime);
+        controller.Move(lockedDirection * chargeSpeed * Time.deltaTime);
 
-        if (Vector3.Distance(transform.position, chargeTarget.position) < 0.5f)
+        if (Vector3.Distance(transform.position, chargeTarget.position) < 0.8f)
         {
-            currentState = AIState.Patrol;
-            currentTarget = (chargeTarget == pointA) ? pointB : pointA;
+            SetNextTarget();
+            StartCharge(); // วิ่งต่อทันที
         }
     }
 
@@ -100,13 +86,15 @@ public class ChargerAI : MonoBehaviour
     // =========================
     void GrabPlayer(GameObject player)
     {
+        if (grabbedPlayer != null) return;
+
         grabbedPlayer = player;
         grabbedPlayerController = player.GetComponent<CharacterController>();
 
         if (grabbedPlayerController != null)
             grabbedPlayerController.enabled = false;
 
-        grabbedPlayer.transform.SetParent(transform);
+        player.transform.SetParent(transform);
 
         currentState = AIState.Grab;
     }
@@ -116,13 +104,15 @@ public class ChargerAI : MonoBehaviour
     // =========================
     void DragPlayer()
     {
-        controller.Move(lockedChargeDirection * chargeSpeed * Time.deltaTime);
+        controller.Move(lockedDirection * chargeSpeed * Time.deltaTime);
 
-        if (Vector3.Distance(transform.position, chargeTarget.position) < 0.5f)
+        if (Vector3.Distance(transform.position, chargeTarget.position) < 0.8f)
         {
             ReleasePlayer();
-            currentTarget = (chargeTarget == pointA) ? pointB : pointA;
-            currentState = AIState.Patrol;
+
+            //  สำคัญ: เปลี่ยนเป้าหมายแล้ววิ่งต่อทันที
+            SetNextTarget();
+            StartCharge();
         }
     }
 
@@ -143,36 +133,7 @@ public class ChargerAI : MonoBehaviour
     }
 
     // =========================
-    // MOVE HELPER
-    // =========================
-    void MoveTo(Vector3 target, float speed)
-    {
-        Vector3 direction = (target - transform.position).normalized;
-        controller.Move(direction * speed * Time.deltaTime);
-
-        if (direction != Vector3.zero)
-            transform.forward = direction;
-    }
-
-    // =========================
-    // VISION TRIGGER
-    // =========================
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player") && currentState == AIState.Patrol)
-        {
-            Transform finalPoint =
-                Vector3.Distance(transform.position, pointA.position) <
-                Vector3.Distance(transform.position, pointB.position)
-                ? pointB
-                : pointA;
-
-            StartCharge(finalPoint);
-        }
-    }
-
-    // =========================
-    // BODY COLLISION
+    // ชนแล้วจับ
     // =========================
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {

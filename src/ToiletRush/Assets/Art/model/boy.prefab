@@ -1,5 +1,54 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &957801116653273537
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6436422527031011721}
+  - component: {fileID: 1677865293869759481}
+  m_Layer: 0
+  m_Name: Global Volume (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6436422527031011721
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 957801116653273537}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.47541547, y: 0.042860735, z: 0.20622553}
+  m_LocalScale: {x: 0.028500382, y: 0.028500382, z: 0.028500382}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2000918897422518557}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1677865293869759481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 957801116653273537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 21b450ef49f83d74aa80d5ba662c9be0, type: 2}
 --- !u!1 &1125014637557246081
 GameObject:
   m_ObjectHideFlags: 0
@@ -1514,6 +1563,9 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 01d796b299a392d4495ce1409dbd29be, type: 3}
+      insertIndex: 0
+      addedObject: {fileID: 6436422527031011721}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 01d796b299a392d4495ce1409dbd29be, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6268766623978829412}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 01d796b299a392d4495ce1409dbd29be, type: 3}
@@ -1642,8 +1694,6 @@ MonoBehaviour:
   staminaSlider: {fileID: 0}
   staminaVisualUI: {fileID: 0}
   gameOverCanvas: {fileID: 0}
-  gameOverImage: {fileID: 0}
-  gameOverSprite: {fileID: 0}
   volume: {fileID: 0}
   phase2Threshold: 0.6
   phase3Threshold: 0.3
@@ -1664,15 +1714,15 @@ MonoBehaviour:
   phase3Volume: 1
   musicFadeSpeed: 1.5
   reactionImage: {fileID: 0}
-  qteSprite: {fileID: -838026422, guid: 13e6a144c79c1dd42b6c4ae4ac960827, type: 3}
+  qteSprite: {fileID: -1192870416, guid: 50a3fcffa6eecbe4e86d80c76441d8d8, type: 3}
   reactionTime: 0.15
   reactionMappings:
   - tag: Banana
-    sprite: {fileID: -934555284, guid: 13e6a144c79c1dd42b6c4ae4ac960827, type: 3}
+    sprite: {fileID: -1892576497, guid: 50a3fcffa6eecbe4e86d80c76441d8d8, type: 3}
   - tag: Water
-    sprite: {fileID: -934555284, guid: 13e6a144c79c1dd42b6c4ae4ac960827, type: 3}
+    sprite: {fileID: -1892576497, guid: 50a3fcffa6eecbe4e86d80c76441d8d8, type: 3}
   - tag: Quest
-    sprite: {fileID: -1524012616, guid: 13e6a144c79c1dd42b6c4ae4ac960827, type: 3}
+    sprite: {fileID: -663977825, guid: 50a3fcffa6eecbe4e86d80c76441d8d8, type: 3}
   sweatParticleInstance: {fileID: 608582657999872953}
   sweatSpawnPoint: {fileID: 2128869248719343544}
   sweatIntervalPhase2: 1.5

@@ -471,9 +471,7 @@ MonoBehaviour:
   waypoints:
   - {fileID: 380421032905350222}
   - {fileID: 344565322205414382}
-  patrolRadius: 6
   waitAtPoint: 0.5
-  waypointBias: 0.6
   catchDistance: 1.2
   searchDuration: 5
   searchRadius: 2
@@ -486,8 +484,6 @@ MonoBehaviour:
   visionRenderer: {fileID: 204380676837771617}
   normalColor: {r: 0, g: 0.8595505, b: 1, a: 1}
   alertColor: {r: 1, g: 0, b: 0, a: 1}
-  gameOverImage: {fileID: 0}
-  gameOverSprite: {fileID: 0}
   alertLoopSound: {fileID: 8300000, guid: 330f6f56c5c9ad44998ea7f3ba1d1c56, type: 3}
   loseSightDelay: 2
 --- !u!136 &5454009242531547165

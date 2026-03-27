@@ -122,9 +122,9 @@ MonoBehaviour:
   slowAmount: 0.6
   zoneMusic: {fileID: 8300000, guid: 281e4ed5db212d44d93d881e5ffca376, type: 3}
   zoneImage: {fileID: 0}
-  zoneSprite: {fileID: -1746347648, guid: 13e6a144c79c1dd42b6c4ae4ac960827, type: 3}
+  zoneSprite: {fileID: 520594400, guid: 50a3fcffa6eecbe4e86d80c76441d8d8, type: 3}
   fadeSpeed: 3
-  sparklePrefab: {fileID: 0}
+  sparklePrefab: {fileID: 8824507839945722958, guid: eed1e28ec9e2a6749b21e87378a417b6, type: 3}
   sparkleCount: 1
   sparkleSpawnRadius: 2
   sparkleSpeedMin: 0.1
@@ -205,7 +205,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0.84890294, b: 0, a: 0.42745098}
+  m_Color: {r: 0, g: 0.85882354, b: 1, a: 0.42745098}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

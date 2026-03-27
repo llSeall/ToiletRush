@@ -1,6 +1,7 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class MiniGameQTE : MonoBehaviour
 {
@@ -15,6 +16,14 @@ public class MiniGameQTE : MonoBehaviour
     private List<KeyCode> sequence = new List<KeyCode>();
     private int currentIndex = 0;
     private MiniGameQuest currentQuest;
+    private bool isResetting = false;
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip successClip;
+    public AudioClip failClip;
+    [Header("Shake")]
+    public float shakeDuration = 0.2f;
+    public float shakeMagnitude = 10f;
 
     public void StartQTE(MiniGameQuest quest)
     {
@@ -86,22 +95,25 @@ public class MiniGameQTE : MonoBehaviour
 
     void Update()
     {
-        // ป้องกัน input ตอน QTE ไม่เปิด
         if (!qtePanel.activeSelf) return;
-
-        // ป้องกัน index เกิน
         if (currentIndex >= sequence.Count) return;
 
-        if (Input.GetKeyDown(sequence[currentIndex]))
-        {
-            arrowSlots[currentIndex].color = Color.green;
+        //  เช็คว่ามีการกดปุ่มก่อน
+        KeyCode pressedKey = GetPressedArrowKey();
 
-            // ซ่อน slot ที่กดแล้ว
+        if (pressedKey == KeyCode.None) return;
+
+        //  กดถูก
+        if (pressedKey == sequence[currentIndex])
+        {
+            if (audioSource && successClip)
+                audioSource.PlayOneShot(successClip);
+
+            arrowSlots[currentIndex].color = Color.green;
             arrowSlots[currentIndex].gameObject.SetActive(false);
 
             currentIndex++;
 
-            // อัปเดต layout ใหม่
             LayoutRebuilder.ForceRebuildLayoutImmediate(
                 qtePanel.GetComponent<RectTransform>()
             );
@@ -111,8 +123,67 @@ public class MiniGameQTE : MonoBehaviour
                 CompleteQTE();
             }
         }
-    }
+        else
+        if (!isResetting)
+        {
+            if (audioSource && failClip)
+                audioSource.PlayOneShot(failClip);
 
+            StartCoroutine(ResetQTE());
+        }
+        if (isResetting) return;
+
+    }
+    IEnumerator ShakeSelf()
+    {
+        RectTransform rect = GetComponent<RectTransform>();
+        Vector3 originalPos = rect.anchoredPosition;
+
+        float elapsed = 0f;
+
+        while (elapsed < shakeDuration)
+        {
+            float x = Random.Range(-1f, 1f) * shakeMagnitude;
+            float y = Random.Range(-1f, 1f) * shakeMagnitude;
+
+            rect.anchoredPosition = originalPos + new Vector3(x, y, 0);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        rect.anchoredPosition = originalPos;
+    }
+    KeyCode GetPressedArrowKey()
+    {
+        if (Input.GetKeyDown(KeyCode.UpArrow)) return KeyCode.UpArrow;
+        if (Input.GetKeyDown(KeyCode.DownArrow)) return KeyCode.DownArrow;
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) return KeyCode.LeftArrow;
+        if (Input.GetKeyDown(KeyCode.RightArrow)) return KeyCode.RightArrow;
+
+        return KeyCode.None;
+    }
+    IEnumerator ResetQTE()
+    {
+        isResetting = true;
+
+        // สีแดง
+        arrowSlots[currentIndex].color = Color.red;
+
+        //  สั่น "ตัวมันเอง"
+        StartCoroutine(ShakeSelf());
+
+        yield return new WaitForSeconds(0.3f);
+
+        GenerateSequence();
+        ShowSequence();
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(
+            GetComponent<RectTransform>()
+        );
+
+        isResetting = false;
+    }
     void CompleteQTE()
     {
         qtePanel.SetActive(false);

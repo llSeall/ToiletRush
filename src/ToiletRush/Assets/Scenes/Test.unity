@@ -424,6 +424,11 @@ MonoBehaviour:
   rightSprite: {fileID: 21300000, guid: 6671a5db5546d424496852208743d170, type: 3}
   playerMovementScript: {fileID: 48189790}
   qteLength: 5
+  audioSource: {fileID: 0}
+  successClip: {fileID: 0}
+  failClip: {fileID: 0}
+  shakeDuration: 0.2
+  shakeMagnitude: 10
 --- !u!1 &40621426
 GameObject:
   m_ObjectHideFlags: 0
@@ -1348,8 +1353,6 @@ MonoBehaviour:
   visionRenderer: {fileID: 107375176}
   normalColor: {r: 0, g: 0.8595505, b: 1, a: 1}
   alertColor: {r: 1, g: 0, b: 0, a: 1}
-  gameOverImage: {fileID: 0}
-  gameOverSprite: {fileID: 0}
   alertLoopSound: {fileID: 0}
   loseSightDelay: 2
 --- !u!143 &202035187
@@ -3000,6 +3003,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   popDuration: 0.35
   startScale: 0.3
+--- !u!65 &585575240 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 8659788753181679407, guid: 73fcc5767f737f345af0421d5b604a6e, type: 3}
+  m_PrefabInstance: {fileID: 1705534922307884155}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &589469201
 GameObject:
   m_ObjectHideFlags: 0
@@ -8323,7 +8331,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalAudioSources: []
   zoneMusicSource: {fileID: 1204683150}
-  fadeDuration: 1.5
+  fadeInDuration: 0.4
+  fadeOutDuration: 0.8
   normalVolume: 1
   mutedVolume: 0
 --- !u!114 &1286388248
@@ -13018,9 +13027,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1924350919}
     m_Modifications:
+    - target: {fileID: 419713376085560654, guid: 73fcc5767f737f345af0421d5b604a6e, type: 3}
+      propertyPath: grabTrigger
+      value: 
+      objectReference: {fileID: 585575240}
+    - target: {fileID: 1485458418346383559, guid: 73fcc5767f737f345af0421d5b604a6e, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1734346356165335020, guid: 73fcc5767f737f345af0421d5b604a6e, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3967883697785311138, guid: 73fcc5767f737f345af0421d5b604a6e, type: 3}
       propertyPath: m_Size.x
       value: 0.12
+      objectReference: {fileID: 0}
+    - target: {fileID: 3967883697785311138, guid: 73fcc5767f737f345af0421d5b604a6e, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5143465661181938399, guid: 73fcc5767f737f345af0421d5b604a6e, type: 3}
       propertyPath: m_LocalPosition.x

@@ -6,11 +6,14 @@ public class ZoneAudioController : MonoBehaviour
     public static ZoneAudioController Instance;
 
     [Header("Audio Sources")]
-    public AudioSource[] normalAudioSources; // เสียงเกมทั้งหมด (BGM, ambient, etc.)
-    public AudioSource zoneMusicSource;      // เพลงโซน
+    public AudioSource[] normalAudioSources;
+    public AudioSource zoneMusicSource;
 
-    [Header("Settings")]
-    public float fadeDuration = 1.5f;
+    [Header("Fade Settings")]
+    public float fadeInDuration = 0.4f;   // เข้าโซน (เร็ว)
+    public float fadeOutDuration = 0.8f;  // ออกโซน (นุ่ม)
+
+    [Header("Volume Settings")]
     public float normalVolume = 1f;
     public float mutedVolume = 0f;
 
@@ -44,39 +47,65 @@ public class ZoneAudioController : MonoBehaviour
 
     IEnumerator FadeAudio(bool entering)
     {
+        float duration = entering ? fadeInDuration : fadeOutDuration;
         float timer = 0f;
 
-        float startNormal = entering ? normalVolume : mutedVolume;
-        float endNormal = entering ? mutedVolume : normalVolume;
+        float startNormal = entering ? normalVolume : 0f;
+        float endNormal = entering ? 0f : normalVolume;
 
         float startZone = entering ? 0f : 1f;
         float endZone = entering ? 1f : 0f;
 
-        while (timer < fadeDuration)
+        //  ถ้าออกโซน  เปิดเสียงปกติก่อน
+        if (!entering)
         {
-            timer += Time.deltaTime;
-            float t = timer / fadeDuration;
+            foreach (var src in normalAudioSources)
+            {
+                if (src != null && !src.isPlaying)
+                    src.UnPause();
+            }
+        }
+
+        while (timer < duration)
+        {
+            timer += Time.unscaledDeltaTime;
+            float t = Mathf.SmoothStep(0f, 1f, timer / duration);
 
             float normalVol = Mathf.Lerp(startNormal, endNormal, t);
             float zoneVol = Mathf.Lerp(startZone, endZone, t);
 
-            //  ปรับเสียงทั้งหมดในเกม
             foreach (var src in normalAudioSources)
             {
                 if (src != null)
                     src.volume = normalVol;
             }
 
-            //  เพลงโซน
             zoneMusicSource.volume = zoneVol;
 
             yield return null;
         }
 
-        // ปิดเพลงเมื่อออกโซน
-        if (!entering)
+        // set ค่าสุดท้าย
+        foreach (var src in normalAudioSources)
         {
-            zoneMusicSource.Stop();
+            if (src != null)
+                src.volume = endNormal;
+        }
+
+        zoneMusicSource.volume = endZone;
+
+        //  เข้าโซน  ปิดเสียงปกติจริง ๆ
+        if (entering)
+        {
+            foreach (var src in normalAudioSources)
+            {
+                if (src != null)
+                    src.Pause(); // หายจริง
+            }
+        }
+        else
+        {
+            zoneMusicSource.Stop(); // ออกจากโซน  ปิดเพลงโซน
         }
     }
 }
