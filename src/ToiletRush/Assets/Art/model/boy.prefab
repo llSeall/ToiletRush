@@ -1709,9 +1709,9 @@ MonoBehaviour:
   phase1Music: {fileID: 8300000, guid: 4c77c3e52d7f14042bdce2814b6c4369, type: 3}
   phase2Music: {fileID: 8300000, guid: 4c77c3e52d7f14042bdce2814b6c4369, type: 3}
   phase3Music: {fileID: 8300000, guid: 4c77c3e52d7f14042bdce2814b6c4369, type: 3}
-  phase1Volume: 0.2
-  phase2Volume: 0.5
-  phase3Volume: 1
+  phase1Volume: 0.1
+  phase2Volume: 0.3
+  phase3Volume: 0.5
   musicFadeSpeed: 1.5
   reactionImage: {fileID: 0}
   qteSprite: {fileID: -1192870416, guid: 50a3fcffa6eecbe4e86d80c76441d8d8, type: 3}

@@ -337,9 +337,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pointA: {fileID: 6849173035660272193}
   pointB: {fileID: 9092600950203394286}
-  patrolSpeed: 10
-  chargeSpeed: 10
-  visionTrigger: {fileID: 8659788753181679407}
+  chargeSpeed: 20
 --- !u!136 &1485458418346383559
 CapsuleCollider:
   m_ObjectHideFlags: 0

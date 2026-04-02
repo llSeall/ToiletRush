@@ -12,6 +12,10 @@ public class ChargerAI : MonoBehaviour
     [Header("Speed")]
     public float chargeSpeed = 8f;
 
+    [Header("Gravity")]
+    public float gravity = -20f;
+    private float verticalVelocity;
+
     private CharacterController controller;
     private AIState currentState;
 
@@ -24,7 +28,9 @@ public class ChargerAI : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
-
+        controller.enabled = false;
+        transform.position = new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z);
+        controller.enabled = true;
         SetNextTarget();
         StartCharge();
     }
@@ -61,10 +67,29 @@ public class ChargerAI : MonoBehaviour
     {
         currentState = AIState.Charging;
 
-        lockedDirection =
-            (chargeTarget.position - transform.position).normalized;
+        Vector3 dir = chargeTarget.position - transform.position;
+        dir.y = 0f; //  ตัดแกน Y
 
-        transform.forward = lockedDirection;
+        lockedDirection = dir.normalized;
+
+        if (lockedDirection != Vector3.zero)
+            transform.forward = lockedDirection;
+    }
+
+    // =========================
+    // APPLY MOVEMENT + GRAVITY
+    // =========================
+    void ApplyMovement(Vector3 horizontalMove)
+    {
+        if (controller.isGrounded && verticalVelocity < 0)
+            verticalVelocity = -2f;
+
+        verticalVelocity += gravity * Time.deltaTime;
+
+        Vector3 move = horizontalMove;
+        move.y = verticalVelocity;
+
+        controller.Move(move * Time.deltaTime);
     }
 
     // =========================
@@ -72,12 +97,12 @@ public class ChargerAI : MonoBehaviour
     // =========================
     void Charge()
     {
-        controller.Move(lockedDirection * chargeSpeed * Time.deltaTime);
+        ApplyMovement(lockedDirection * chargeSpeed);
 
         if (Vector3.Distance(transform.position, chargeTarget.position) < 0.8f)
         {
             SetNextTarget();
-            StartCharge(); // วิ่งต่อทันที
+            StartCharge();
         }
     }
 
@@ -104,13 +129,12 @@ public class ChargerAI : MonoBehaviour
     // =========================
     void DragPlayer()
     {
-        controller.Move(lockedDirection * chargeSpeed * Time.deltaTime);
+        ApplyMovement(lockedDirection * chargeSpeed);
 
         if (Vector3.Distance(transform.position, chargeTarget.position) < 0.8f)
         {
             ReleasePlayer();
 
-            //  สำคัญ: เปลี่ยนเป้าหมายแล้ววิ่งต่อทันที
             SetNextTarget();
             StartCharge();
         }
