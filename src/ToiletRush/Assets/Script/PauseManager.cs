@@ -28,6 +28,8 @@ public class PauseManager : MonoBehaviour
     void Start()
     {
         pausePanel.SetActive(false);
+        AudioListener.pause = false;
+
 
         if (escImagePanel != null)
             escImagePanel.SetActive(false);
@@ -129,7 +131,20 @@ public class PauseManager : MonoBehaviour
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
+        AudioListener.pause = false; //  ต้องมี
         SceneManager.LoadScene("MainMenu");
+    }
+    public void QuitGame()
+    {
+        //  กันบัคเสียงค้าง
+        AudioListener.pause = false;
+
+        //  กัน timeScale ค้าง
+        Time.timeScale = 1f;
+
+        Debug.Log("Quit Game");
+
+        Application.Quit();
     }
     IEnumerator BlurTransition(float targetAperture)
     {
@@ -144,5 +159,6 @@ public class PauseManager : MonoBehaviour
             dof.aperture.value = Mathf.Lerp(start, targetAperture, time / duration);
             yield return null;
         }
+
     }
 }
