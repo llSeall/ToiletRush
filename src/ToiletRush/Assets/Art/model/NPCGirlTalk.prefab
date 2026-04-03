@@ -494,10 +494,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   chaseSpeed: 4
-  lostSightDelay: 0.6
   playerMovement: {fileID: 0}
   stunTime: 3
   qteUI: {fileID: 0}
+  staminaSystem: {fileID: 0}
   audioSource: {fileID: 3419086890105891720}
   maleVoice: {fileID: 8300000, guid: 6665ee75ac965e94b9bf22ece04a70ee, type: 3}
   femaleVoice: {fileID: 8300000, guid: d4bb44eba1973b14aaf4e57be26ee99f, type: 3}

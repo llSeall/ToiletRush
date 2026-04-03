@@ -90,13 +90,14 @@ public class NPCPatrolTalkAI : MonoBehaviour
 
         if (target.CompareTag("Player"))
         {
+            Vector3 eyePos = transform.position + Vector3.up * 1.5f; // ปรับความสูงได้
             Vector3 dir = (target.position - transform.position);
             float distance = dir.magnitude;
 
             // ยิง Raycast ไปหาผู้เล่น
-            if (Physics.Raycast(transform.position, dir.normalized, out RaycastHit hit, detectRadius))
+
+            if (Physics.Raycast(eyePos, dir.normalized, out RaycastHit hit, detectRadius))
             {
-                // ถ้า Raycast ชน "Player" จริง  ไม่มีอะไรกั้น
                 if (hit.transform.CompareTag("Player"))
                 {
                     player = target;
